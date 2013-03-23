@@ -1,0 +1,4 @@
+SUBDIRS = \
+	octave \
+	matlab \
+	gtk 
