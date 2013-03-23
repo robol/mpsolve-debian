@@ -1,0 +1,2 @@
+?package(mpsolve):needs="text" section="Applications/Science/Mathematics"\
+  title="mpsolve" command="/usr/bin/mpsolve"

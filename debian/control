@@ -1,0 +1,58 @@
+Source: mpsolve
+Section: science
+Priority: extra
+Maintainer: Leonardo Robol <leo@robol.it>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev,
+	check,
+	libgmp-dev,
+	libgtk-3-dev, 
+	libqt4-dev,
+	libtcmalloc-minimal4
+Standards-Version: 3.9.4
+Homepage: http://riccati.dm.unipi.it/mpsolve/
+Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git
+
+Package: mpsolve
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmps3 (= ${binary:Version})
+Description: Multiprecision polynomial solver
+ A polynomial rootfinder that can determine arbitrary precision approximations
+ with guaranteed inclusion radii. 
+ It supports exploiting of polynomial structures such as sparsisty and allows
+ for polynomial implicitly defined or in some non standard basis. 
+ .
+ This package contains the command line version of MPSolve.
+
+Package: libmps3
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Multiprecision polynomial solver
+ A polynomial rootfinder that can determine arbitrary precision approximations
+ with guaranteed inclusion radii.
+ It supports exploiting of polynomial structures such as sparsisty and allows
+ for polynomial implicitly defined or in some non standard basis.
+ .
+ This package contains the libmps shared library
+
+Package: libmps3-dev
+Architecture: any
+Section: libdevel
+Depends: ${misc:Depends}, libmps3 (= ${binary:Version})
+Description: Multiprecision polynomial solver
+ A polynomial rootfinder that can determine arbitrary precision approximations
+ with guaranteed inclusion radii.
+ It supports exploiting of polynomial structures such as sparsisty and allows
+ for polynomial implicitly defined or in some non standard basis.
+ .
+ This package contains the development headers and the .so library.
+
+Package: xmpsolve
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmps3 (= ${binary:Version})
+Description: Multiprecision polynomial solver
+ A polynomial rootfinder that can determine arbitrary precision approximations
+ with guaranteed inclusion radii.
+ It supports exploiting of polynomial structures such as sparsisty and allows
+ for polynomial implicitly defined or in some non standard basis.
+ .
+ This package contains the graphical version of MPSolve.
