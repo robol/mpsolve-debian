@@ -292,7 +292,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 bin_PROGRAMS = $(QT4_PROGRAMS)
 xmpsolve_SOURCES = 
-man_MANS = ${top_srcdir}/xmpsolve.1
+man_MANS = ${srcdir}/xmpsolve.1
 EXTRA_DIST = $(icon_DATA) \
 	$(desktop_DATA) \
 	$(XMPSOLVE_QT_SOURCES)
