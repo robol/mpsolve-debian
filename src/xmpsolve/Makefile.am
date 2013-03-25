@@ -3,7 +3,7 @@ EXTRA_PROGRAMS = xmpsolve
 
 xmpsolve_SOURCES = 
 
-man_MANS = ${top_srcdir}/xmpsolve.1
+man_MANS = ${srcdir}/xmpsolve.1
 
 EXTRA_DIST = xmpsolve.1
 
