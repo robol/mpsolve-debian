@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([MPSolve], [3.1.1], [robol@poisson.phc.unipi.it])
+AC_INIT([MPSolve], [3.1.2], [robol@poisson.phc.unipi.it])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
@@ -63,6 +63,9 @@ fi
 # Add GMP_CFLAGS and GMP_LIBS to CFLAGS and LDFLAGS in case they are set.
 CFLAGS="$GMP_CFLAGS $CFLAGS"
 LDFLAGS="$GMP_LIBS $LDFLAGS"
+
+AC_SUBST(GMP_CFLAGS)
+AC_SUBST(GMP_LIBS)
 
 GENERAL_CFLAGS="-D_REENTRANT -Wstrict-prototypes -Wall $CFLAGS"
 
@@ -143,6 +146,8 @@ GENERAL_CFLAGS="$GENERAL_CFLAGS $PTHREAD_CFLAGS"
 GENERAL_LIBS="$PTHREAD_LIBS $GENERAL_LIBS $LDFLAGS"
 CC="$PTHREAD_CC"
 
+AC_SUBST(CC)
+
 #
 # ===== OPTIONAL LIBRARIES =====
 #
@@ -160,12 +165,10 @@ AC_CHECK_LIB([tcmalloc_minimal], [malloc])
 
 # Check for the check module, so MPSolve tests can be run. 
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4], [have_check=yes], [have_check=no])
-CHECK_CFLAGS="$GENERAL_CFLAGS"
-CHECK_LIBS="$GENERAL_LIBS"
 
 # If check was fuond enable the tests that need to be built
 AS_IF([test "x$have_check" = "xyes"], [ 
-  CHECK_PROGRAMS="test_mpsolve check_dpe check_secsolve check_unisolve check_multithread check_cluster"
+  CHECK_PROGRAMS="check_dpe check_secsolve check_unisolve check_multithread check_cluster"
 ])
   
 AC_SUBST(CHECK_PROGRAMS)
@@ -339,6 +342,7 @@ AC_CONFIG_FILES([Makefile
     src/tests/Makefile
     src/xmpsolve/Makefile
     src/xmpsolve/xmpsolve.pro
+    src/xmpsolve/xmpsolve.desktop
     doc/Makefile
     doc/Doxyfile])
 
@@ -364,7 +368,7 @@ fi
 
 # Check MATLAB (TM) module
 if [test x$enable_matlab = xyes]; then
-        echo "	MATLAB (tm) module:	$enable_octave (generates examples/matlab/$MATLAB_MODULES_PROGRAMS.mex)"
+        echo "	MATLAB (tm) module:	$enable_matlab (generates examples/matlab/$MATLAB_MODULES_PROGRAMS.mex)"
 else
         echo "	MATLAB (tm) module:	no"
 fi

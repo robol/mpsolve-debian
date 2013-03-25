@@ -144,6 +144,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GMP_CFLAGS = @GMP_CFLAGS@
+GMP_LIBS = @GMP_LIBS@
 GREP = @GREP@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_FOUND = @GTK_FOUND@
@@ -261,7 +263,7 @@ top_srcdir = @top_srcdir@
 noinst_PROGRAMS = $(OCTAVE_MODULES_PROGRAMS)
 mps_roots_oct_SOURCES = mps_roots.cc
 mps_roots_oct_LINK = $(MKOCTFILE) -o $@ -L${top_builddir}/src/libmps/.libs \
-	-lmps -lm -lgmp
+	-lmps $(MPSOLVE_LIBS)
 
 all: all-am
 
@@ -548,7 +550,7 @@ uninstall-am:
 	pdf pdf-am ps ps-am tags uninstall uninstall-am
 
 mps_roots.o:
-	$(MKOCTFILE) -I${top_srcdir}/include -c -o mps_roots.o ${srcdir}/mps_roots.cc
+	$(MKOCTFILE) $(GMP_CFLAGS) -I${top_srcdir}/include -c -o mps_roots.o ${srcdir}/mps_roots.cc
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
