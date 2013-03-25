@@ -293,6 +293,10 @@ top_srcdir = @top_srcdir@
 bin_PROGRAMS = $(QT4_PROGRAMS)
 xmpsolve_SOURCES = 
 man_MANS = ${top_srcdir}/xmpsolve.1
+EXTRA_DIST = $(icon_DATA) \
+	$(desktop_DATA) \
+	$(XMPSOLVE_QT_SOURCES)
+
 
 # Install desktop file
 desktopdir = $(datadir)/applications
@@ -320,10 +324,6 @@ XMPSOLVE_QT_SOURCES = polynomialparser.cpp \
 	mpsolveworker.h \
 	main.cpp \
 	mainwindow.ui
-
-EXTRA_DIST = $(icon_DATA) \
-	$(desktop_DATA) \
-	$(XMPSOLVE_QT_SOURCES)
 
 all: all-am
 

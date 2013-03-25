@@ -5,6 +5,8 @@ xmpsolve_SOURCES =
 
 man_MANS = ${top_srcdir}/xmpsolve.1
 
+EXTRA_DIST = xmpsolve.1
+
 # Install desktop file
 desktopdir = $(datadir)/applications
 desktop_DATA = xmpsolve.desktop
