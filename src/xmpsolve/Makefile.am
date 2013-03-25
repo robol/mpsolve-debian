@@ -3,7 +3,17 @@ EXTRA_PROGRAMS = xmpsolve
 
 xmpsolve_SOURCES = 
 
-EXTRA_DIST = polynomialparser.cpp \
+man_MANS = ${top_srcdir}/xmpsolve.1
+
+# Install desktop file
+desktopdir = $(datadir)/applications
+desktop_DATA = xmpsolve.desktop
+
+# Install icon for xmpsolve
+icondir = $(datadir)/icons
+icon_DATA = xmpsolve.png
+
+XMPSOLVE_QT_SOURCES = polynomialparser.cpp \
 	rootsrenderer.h \
 	polynomialsolver.cpp \
 	mainwindow.cpp \
@@ -22,6 +32,10 @@ EXTRA_DIST = polynomialparser.cpp \
 	mpsolveworker.h \
 	main.cpp \
 	mainwindow.ui
+
+EXTRA_DIST = $(icon_DATA) \
+	$(desktop_DATA) \
+	$(XMPSOLVE_QT_SOURCES)
 
 Makefile.qmake: xmpsolve.pro
 	$(QMAKE_QT4) xmpsolve.pro
