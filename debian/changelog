@@ -1,4 +1,16 @@
-mpsolve (3.1.2-3) UNRELEASED; urgency=low
+mpsolve (3.1.2-6) UNRELEASED; urgency=low
+
+  * Remote autotools-dev since it was not supported in lucid
+
+ -- Leonardo Robol <leo@robol.it>  Tue, 26 Mar 2013 12:44:11 +0100
+
+mpsolve (3.1.2-5~unstable) unstable; urgency=low
+
+  * Added alternative dependencies for gtk. 
+
+ -- Leonardo Robol <leo@robol.it>  Tue, 26 Mar 2013 11:40:29 +0100
+
+mpsolve (3.1.2-3~unstable) unstable; urgency=low
 
   * Added alternative dependencies to support older releases
 
