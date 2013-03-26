@@ -1,4 +1,10 @@
-mpsolve (3.1.2-2) UNRELEASED; urgency=low
+mpsolve (3.1.2-3) UNRELEASED; urgency=low
+
+  * Added alternative dependencies to support older releases
+
+ -- Leonardo Robol <leo@robol.it>  Tue, 26 Mar 2013 10:50:01 +0100
+
+mpsolve (3.1.2-2) unstable; urgency=low
 
   * Added dependency against libtool
 
