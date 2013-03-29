@@ -72,7 +72,9 @@ am__objects_1 =
 am_mpsolve_OBJECTS = mpsolve-iteration-logger.$(OBJEXT) \
 	mpsolve-mpsolve.$(OBJEXT) $(am__objects_1)
 mpsolve_OBJECTS = $(am_mpsolve_OBJECTS)
-mpsolve_DEPENDENCIES = ${top_builddir}/src/libmps/libmps.la
+am__DEPENDENCIES_1 =
+mpsolve_DEPENDENCIES = ${top_builddir}/src/libmps/libmps.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -193,6 +195,8 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBMPS_CFLAGS = @LIBMPS_CFLAGS@
+LIBMPS_LDFLAGS = @LIBMPS_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -205,10 +209,6 @@ MATLAB_MODULES_PROGRAMS = @MATLAB_MODULES_PROGRAMS@
 MEX = @MEX@
 MKDIR_P = @MKDIR_P@
 MKOCTFILE = @MKOCTFILE@
-MPSOLVE_CFLAGS = @MPSOLVE_CFLAGS@
-MPSOLVE_LIBS = @MPSOLVE_LIBS@
-MPS_CFLAGS = @MPS_CFLAGS@
-MPS_LDFLAGS = @MPS_LDFLAGS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -230,6 +230,7 @@ PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LDFLAGS = @PTHREAD_LDFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 QMAKE_QT4 = @QMAKE_QT4@
 QMAKE_VERSION = @QMAKE_VERSION@
@@ -302,7 +303,7 @@ EXTRA_DIST = mpsolve.1
 mpsolve_CFLAGS = \
         -I${top_srcdir}/include \
 	-I. \
-	$(MPSOLVE_CFLAGS) \
+	$(GMP_CFLAGS) \
 	$(GTK_CFLAGS) \
 	$(NULL)
 
@@ -312,12 +313,12 @@ mpsolve_SOURCES = \
 	mpsolve.c \
 	$(NULL)
 
-mpsolve_LDFLAGS = \
+mpsolve_LDFLAGS = 
+mpsolve_LDADD = \
+	${top_builddir}/src/libmps/libmps.la \
+	$(GMP_LIBS) \
 	$(MPSOLVE_LIBS) \
 	$(GTK_LIBS)
-
-mpsolve_LDADD = \
-	${top_builddir}/src/libmps/libmps.la
 
 all: all-am
 

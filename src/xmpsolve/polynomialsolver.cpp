@@ -25,23 +25,13 @@ PolynomialSolver::~PolynomialSolver()
 int
 PolynomialSolver::solvePolFile(QString selectedFile, mps_algorithm selected_algorithm, int required_digits)
 {
-    FILE * inputStream = NULL;
-
     QByteArray stringData = selectedFile.toLatin1().data();
-    inputStream = fopen(reinterpret_cast<char *>(stringData.data()), "r");
-
-    if (!inputStream) {
-        qDebug() << "Error opening the file provided by the user";
-        m_errorMessage = tr("Error opening the specified polynomial file.");
-        return -1;
-    }
 
     m_mpsContext = mps_context_new();
     m_worker.setMpsContext(m_mpsContext);
 
     // Parse the stream specified by the user
-    mps_parse_stream (m_mpsContext, inputStream);
-    fclose(inputStream);
+    mps_parse_file (m_mpsContext, stringData.data());
 
     if (mps_context_has_errors (m_mpsContext)) {
         m_errorMessage = tr("Error while solving the given pol file: %1").
@@ -54,6 +44,7 @@ PolynomialSolver::solvePolFile(QString selectedFile, mps_algorithm selected_algo
     // Select the options selected by the user
     mps_context_select_algorithm(m_mpsContext, selected_algorithm);
     mps_context_set_output_prec(m_mpsContext, required_digits * LOG2_10);
+    mps_context_set_output_goal(m_mpsContext, MPS_OUTPUT_GOAL_APPROXIMATE);
 
     m_worker.start();
     return mps_context_get_degree (m_mpsContext);
@@ -134,12 +125,8 @@ PolynomialSolver::workerExited()
 
     for (int i = 0; i < n; i++)
     {
-        Root* r = new Root();
-
-        mpc_init2 (r->value, mpc_get_prec (results[i]));
-        mpc_set (r->value, results[i]);
-        rdpe_set (r->radius, radii[i]);
-
+        mps_root_status status = mps_context_get_root_status (m_mpsContext, i);
+        Root* r = new Root(results[i], radii[i], status);
         roots.append(r);
     }
 
@@ -158,13 +145,22 @@ PolynomialSolver::workerExited()
     delete [] results;
     delete [] radii;
 
+    // Update the internal model with the approximations
+    m_rootsModel.setRoots(roots);
+
     /* Set the roots somewhere and then called
      * the solved() signal */
-    solved(roots);
+    solved();
 }
 
 unsigned long int
 PolynomialSolver::CPUTime()
 {
     return m_worker.CPUTime();
+}
+
+RootsModel *
+PolynomialSolver::rootsModel()
+{
+    return &m_rootsModel;
 }

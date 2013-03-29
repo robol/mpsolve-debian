@@ -28,7 +28,9 @@ include_HEADERS = \
 
 AM_CPPFLAGS= \
         -I${top_srcdir}/include \
-	$(MPS_CFLAGS) \
+	$(LIBMPS_CFLAGS) \
+	$(GMP_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 libmps_la_SOURCES = \
@@ -80,6 +82,11 @@ libmps_la_SOURCES = \
 	    user.c \
 	    $(NULL)
 
+libmps_la_LDFLAGS = \
+	$(PTHREAD_CFLAGS)
+
 libmps_la_LIBADD = \
 	$(MPS_LDFLAGS) \
+	$(GMP_LIBS) \
+	$(PTHREAD_LIBS) \
 	$(NULL)
