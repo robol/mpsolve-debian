@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QItemSelection>
 #include "root.h"
 #include "polynomialsolver.h"
+#include "polfileeditordialog.h"
 #include<mps/mps.h>
 
 namespace Ui {
@@ -21,7 +23,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void polynomial_solved(QList<Root*>);
+    void polynomial_solved();
     
 private slots:
     void on_solveButton_clicked();
@@ -30,9 +32,14 @@ private slots:
 
     void on_openPolFileButton_clicked();
 
+    void on_listRootsView_clicked(const QModelIndex &index);
+
+    void on_editPolFileButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     PolynomialSolver m_solver;
+    QString m_selectedPolFile;
 };
 
 } // Namespace xmpsolve

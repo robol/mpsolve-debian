@@ -97,7 +97,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libmps_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+libmps_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__objects_1 =
 am_libmps_la_OBJECTS = aberth.lo approximation.lo chebyshev.lo \
 	chebyshev-evaluation.lo cluster.lo cluster-analysis.lo \
@@ -203,6 +204,8 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBMPS_CFLAGS = @LIBMPS_CFLAGS@
+LIBMPS_LDFLAGS = @LIBMPS_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -215,10 +218,6 @@ MATLAB_MODULES_PROGRAMS = @MATLAB_MODULES_PROGRAMS@
 MEX = @MEX@
 MKDIR_P = @MKDIR_P@
 MKOCTFILE = @MKOCTFILE@
-MPSOLVE_CFLAGS = @MPSOLVE_CFLAGS@
-MPSOLVE_LIBS = @MPSOLVE_LIBS@
-MPS_CFLAGS = @MPS_CFLAGS@
-MPS_LDFLAGS = @MPS_LDFLAGS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -240,6 +239,7 @@ PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LDFLAGS = @PTHREAD_LDFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 QMAKE_QT4 = @QMAKE_QT4@
 QMAKE_VERSION = @QMAKE_VERSION@
@@ -308,7 +308,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
 lib_LTLIBRARIES = libmps.la
-libmps_la_LDFLAGS = -version-info 3:0:0
+libmps_la_LDFLAGS = \
+	$(PTHREAD_CFLAGS)
+
 include_HEADERS = \
         ${top_srcdir}/include/mps/approximation.h \
         ${top_srcdir}/include/mps/tools.h \
@@ -334,7 +336,9 @@ include_HEADERS = \
 
 AM_CPPFLAGS = \
         -I${top_srcdir}/include \
-	$(MPS_CFLAGS) \
+	$(LIBMPS_CFLAGS) \
+	$(GMP_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 libmps_la_SOURCES = \
@@ -388,6 +392,8 @@ libmps_la_SOURCES = \
 
 libmps_la_LIBADD = \
 	$(MPS_LDFLAGS) \
+	$(GMP_LIBS) \
+	$(PTHREAD_LIBS) \
 	$(NULL)
 
 all: all-am

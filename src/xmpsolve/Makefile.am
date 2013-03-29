@@ -13,7 +13,7 @@ desktop_DATA = xmpsolve.desktop
 icondir = $(datadir)/icons
 icon_DATA = xmpsolve.png
 
-XMPSOLVE_QT_SOURCES = polynomialparser.cpp \
+XMPSOLVE_QT_FILES = polynomialparser.cpp \
 	rootsrenderer.h \
 	polynomialsolver.cpp \
 	mainwindow.cpp \
@@ -31,12 +31,19 @@ XMPSOLVE_QT_SOURCES = polynomialparser.cpp \
 	polynomialsolver.h \
 	mpsolveworker.h \
 	main.cpp \
-	mainwindow.ui
+	mainwindow.ui \
+	rootsmodel.h \
+	rootsmodel.cpp \
+	polfileeditordialog.ui \
+	polfileeditordialog.cpp \
+	polfileeditordialog.h \
+	polsyntaxhighlighter.h \
+	polsyntaxhighlighter.cpp
 
 EXTRA_DIST = $(icon_DATA) \
 	$(desktop_DATA) \
 	xmpsolve.1 \
-	$(XMPSOLVE_QT_SOURCES)
+	$(XMPSOLVE_QT_FILES)
 
 Makefile.qmake: xmpsolve.pro
 	$(QMAKE_QT4) xmpsolve.pro

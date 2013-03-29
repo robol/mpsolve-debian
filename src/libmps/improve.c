@@ -80,6 +80,9 @@ mps_improve (mps_context * s)
 
   long int base_wp = s->mpwp;
 
+  MPS_DEBUG_WITH_INFO (s, "Lowering the number of threads to 1");
+  mps_thread_pool_set_concurrency_limit (s, NULL, 1);
+
   for (i = 0; i < s->n; i++)
     {
       improve_data[i].s = s;
@@ -133,28 +136,37 @@ mps_improve_root2 (void * data_ptr)
 
   mpc_t nwtcorr;
 
+  mpc_init2 (nwtcorr, 64);
+
   /* Get the number of correct digits that you have obtained until 
    * now. */
   rdpe_t root_mod;
 
   mpc_rmod (root_mod, root->mvalue);
-  int correct_bits = rdpe_Esp (root_mod) - rdpe_Esp (root->drad) - 1;
+  int correct_bits = MAX (0, rdpe_Esp (root_mod) - rdpe_Esp (root->drad) - 1);
 
-  mpc_init2 (nwtcorr, root->wp);
+  rdpe_t conditioning;
+  rdpe_div (conditioning, root->drad, root_mod);
+  rdpe_div_eq (conditioning, root->drad);
+
+  int conditioning_bits = MAX (0, rdpe_log (conditioning)) / LOG2 + 
+    MAX (mpc_get_prec (root->mvalue), root->wp);
 
   MPS_DEBUG_MPC (ctx, 15, root->mvalue, "Approximating root ");
   MPS_DEBUG (ctx, "Correct bits = %d", correct_bits);
+  MPS_DEBUG (ctx, "Conditioning bits = %d", conditioning_bits);
 
   while (correct_bits <= ctx->output_config->prec || rdpe_eq_zero (root_mod))
   {
     rdpe_t nwtcorr_mod;
 
-    wp *= 2;
+    wp = 2 * correct_bits + conditioning_bits;
 
-    if (wp >= p->prec)
+    if (wp >= p->prec && p->prec != 0)
     {
       MPS_DEBUG (ctx, 
         "Reached maximum allowed precision due to limited input precision. Aborting improvement");
+      MPS_DEBUG(ctx, "Precision = %ld", p->prec)
       ctx->over_max = true;
       break;
     }
@@ -179,7 +191,7 @@ mps_improve_root2 (void * data_ptr)
 
     rdpe_add_eq (root->drad, nwtcorr_mod);
 
-    correct_bits = rdpe_Esp (root_mod) - rdpe_Esp (root->drad) - 1;
+    correct_bits = MAX (rdpe_Esp (root_mod) - rdpe_Esp (root->drad), 0);
 
     if (ctx->debug_level & MPS_DEBUG_IMPROVEMENT)
       MPS_DEBUG (ctx, "    Correct bits = %d", correct_bits);
