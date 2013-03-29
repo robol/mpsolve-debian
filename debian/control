@@ -9,7 +9,6 @@ Build-Depends: debhelper (>= 6.0.0), autotools-dev,
 	libcairo2-dev,
 	libqt4-dev,
 	libtcmalloc-minimal4 | libtcmalloc-minimal0,
-	libtool
 Standards-Version: 3.9.4
 Homepage: http://riccati.dm.unipi.it/mpsolve/
 Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git

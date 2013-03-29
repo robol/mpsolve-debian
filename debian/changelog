@@ -1,4 +1,10 @@
-mpsolve (3.1.2-6) UNRELEASED; urgency=low
+mpsolve (3.1.2-7) unstable; urgency=low
+
+  * Set compat to 7
+
+ -- Leonardo Robol <leo@robol.it>  Tue, 26 Mar 2013 13:07:39 +0100
+
+mpsolve (3.1.2-6) unstable; urgency=low
 
   * Remote autotools-dev since it was not supported in lucid
 
