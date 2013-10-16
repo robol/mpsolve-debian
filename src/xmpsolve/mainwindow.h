@@ -6,7 +6,7 @@
 #include "root.h"
 #include "polynomialsolver.h"
 #include "polfileeditordialog.h"
-#include<mps/mps.h>
+#include <mps/mps.h>
 
 namespace Ui {
     class MainWindow;
@@ -35,6 +35,8 @@ private slots:
     void on_listRootsView_clicked(const QModelIndex &index);
 
     void on_editPolFileButton_clicked();
+
+    void on_polFileSolveButton_clicked();
 
 private:
     Ui::MainWindow *ui;

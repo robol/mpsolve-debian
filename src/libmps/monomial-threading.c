@@ -150,6 +150,9 @@ mps_thread_fpolzer (mps_context * s, int *it, mps_boolean * excep, int required_
       nzeros++;
   if (nzeros == s->n)
     {
+      free (roots_mutex);
+      free (aberth_mutex);
+      mps_thread_job_queue_free (queue);
       return;
     }
 
@@ -251,6 +254,8 @@ mps_thread_dpolzer_worker (void *data_ptr)
                   s->lastphase = dpe_phase;
                   cdpe_set_d (abcorr, DBL_EPSILON, 0);
                 }
+
+              MPS_DEBUG_RDPE (s, s->root[i]->drad, "drad");
 
               cdpe_div (abcorr, corr, abcorr);
               cdpe_sub_eq (s->root[i]->dvalue, abcorr);

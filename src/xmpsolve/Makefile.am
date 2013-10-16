@@ -1,9 +1,9 @@
-bin_PROGRAMS = $(QT4_PROGRAMS)
-EXTRA_PROGRAMS = xmpsolve
+if HAVE_UI
 
-xmpsolve_SOURCES = 
+bin_PROGRAMS = $(QT_PROGRAMS)
+EXTRA_PROGRAMS = xmpsolve$(EXEEXT)
 
-man_MANS = ${srcdir}/xmpsolve.1
+man_MANS = ${builddir}/xmpsolve.1
 
 # Install desktop file
 desktopdir = $(datadir)/applications
@@ -13,47 +13,104 @@ desktop_DATA = xmpsolve.desktop
 icondir = $(datadir)/icons
 icon_DATA = xmpsolve.png
 
-XMPSOLVE_QT_FILES = polynomialparser.cpp \
-	rootsrenderer.h \
-	polynomialsolver.cpp \
-	mainwindow.cpp \
-	polynomial.cpp \
-	monomial.h \
-	mainwindow.ui \
-	polynomial.h \
-	root.h \
-	monomial.cpp \
-	mpsolveworker.cpp \
-	root.cpp \
-	rootsrenderer.cpp \
-	polynomialparser.h \
-	mainwindow.h \
-	polynomialsolver.h \
-	mpsolveworker.h \
+xmpsolve_CPPFLAGS = \
+	-I${top_srcdir}/include \
+	-I${top_builddir} \
+	-I${builddir} \
+	-I${srcdir} \
+	$(QT_CFLAGS)
+
+if ! WINDOWS_BUILD
+xmpsolve_CPPFLAGS += -fPIC
+endif
+
+xmpsolve_LDFLAGS = \
+	$(QT_LDFLAGS)
+
+xmpsolve_LDADD = \
+	$(QT_LIBS) \
+	${top_builddir}/src/libmps/libmps.la
+
+%_moc.cpp: @srcdir@/%.h
+	$(AM_V_GEN)
+	$(AM_V_at) $(MOC) $< -o $@
+
+ui_%.h: @srcdir@/%.ui
+	$(AM_V_GEN) 
+	$(AM_V_at) $(UIC) $< -o $@
+
+# Windows resources
+if HAVE_WINDRES
+.rc.o:
+	$(AM_V_GEN)
+	$(AM_V_at) $(WINDRES) $< -o $@
+
+%.o : %.rc
+	$(AM_V_GEN)
+	$(AM_V_at) $(WINDRES) $< -o $@
+
+resources = xmpsolve.rc
+
+endif
+
+pure_source_files = \
+	polynomialparser.cpp  \
+	polynomialsolver.cpp  \
+	mainwindow.cpp  \
+	rootsmodel.cpp  \
+	polfileeditordialog.cpp  \
+	polsyntaxhighlighter.cpp  \
+	mpsolveworker.cpp  \
+	rootsrenderer.cpp  
+
+other_source_files = \
 	main.cpp \
+	polynomial.cpp  \
+	monomial.cpp  \
+	root.cpp 
+
+ui_files = \
+	ui_mainwindow.h \
+	ui_polfileeditordialog.h 
+
+ui_sfiles = \
 	mainwindow.ui \
-	rootsmodel.h \
-	rootsmodel.cpp \
-	polfileeditordialog.ui \
-	polfileeditordialog.cpp \
-	polfileeditordialog.h \
-	polsyntaxhighlighter.h \
-	polsyntaxhighlighter.cpp
+	polfileeditordialog.ui
+
+headers = \
+	rootsrenderer.h  \
+	rootsmodel.h  \
+	polfileeditordialog.h  \
+	monomial.h  \
+	polynomial.h  \
+	root.h  \
+	polynomialparser.h  \
+	polsyntaxhighlighter.h  \
+	mainwindow.h  \
+	polynomialsolver.h  \
+	mpsolveworker.h
+
+moc_files = $(pure_source_files:.cpp=_moc.cpp)
+
+xmpsolve_SOURCES = \
+	$(other_source_files) \
+	$(pure_source_files) \
+	$(resources)
+
+nodist_xmpsolve_SOURCES = \
+	$(moc_files)
+
+CLEANFILES = \
+	$(moc_files) \
+	$(ui_files)
 
 EXTRA_DIST = $(icon_DATA) \
+	$(headers) \
 	$(desktop_DATA) \
-	xmpsolve.1 \
-	$(XMPSOLVE_QT_FILES)
+	$(ui_sfiles) \
+	xmpsolve.1
 
-Makefile.qmake: xmpsolve.pro
-	$(QMAKE_QT4) xmpsolve.pro
+BUILT_SOURCES = $(moc_files) \
+	$(ui_files)
 
-xmpsolve: Makefile.qmake
-	+make -f Makefile.qmake xmpsolve	
-
-clean-local:
-	+make -f Makefile.qmake clean
-
-distclean-local: clean-local
-	rm -f Makefile.qmake
-	rm -f ${srcdir}/xmpsolve.pro
+endif # HAVE_UI

@@ -122,13 +122,13 @@ mps_secular_ga_mpsolve (mps_context * s)
 
   if (s->output_config->search_set != MPS_SEARCH_SET_COMPLEX_PLANE)
     {
-      mps_error (s, 1, "The restricted search set is not supported using the algorithm MPS_ALGORITHM_SECULAR_GA.");
+      mps_error (s, "The restricted search set is not supported using the algorithm MPS_ALGORITHM_SECULAR_GA.");
       return;
     }
 
   if (s->output_config->root_properties != MPS_OUTPUT_PROPERTY_NONE)
     {
-      mps_error (s, 1, "The root properties detection is not supported using the algorithm MPS_ALGORITHM_SECULAR_GA.");
+      mps_error (s, "The root properties detection is not supported using the algorithm MPS_ALGORITHM_SECULAR_GA.");
       return;
     }
 
@@ -206,7 +206,10 @@ mps_secular_ga_mpsolve (mps_context * s)
           mps_check_data (s, &which_case);
 
           if (mps_context_has_errors (s))
-            return;
+            {
+              mps_stop_timer (total_clock);
+              return;
+            }
 
           MPS_DEBUG_WITH_INFO (s, "Check data suggests starting phase should be %s", (which_case == 'f') ? "floating point" : "DPE phase");
 
@@ -239,7 +242,8 @@ mps_secular_ga_mpsolve (mps_context * s)
           break;
 
         default:
-          mps_error (s, 1, "Unrecognized starting phase");
+          mps_error (s, "Unrecognized starting phase");
+          mps_stop_timer (total_clock);
           return;
       }
 
@@ -247,6 +251,33 @@ mps_secular_ga_mpsolve (mps_context * s)
 
       if (mps_secular_ga_check_stop (s))
         goto cleanup;
+
+      /* In the case where we started in DPE but the initial approximation are
+       * representable as standard floating point numbers, go back to float_phase. */
+      if (s->lastphase == dpe_phase)
+        {
+          mps_boolean really_need_dpe = false;
+          rdpe_t module;
+
+          for (i = 0; i < s->n; i++)
+            {
+              cdpe_mod (module, s->root[i]->dvalue);
+              if (rdpe_gt (module, rdpe_maxd) || rdpe_lt (module, rdpe_mind))
+                really_need_dpe = true;
+            }
+
+          if (! really_need_dpe) 
+          {
+            MPS_DEBUG_WITH_INFO (s, "Going back to float_phase because all the approximations "
+              "are representable as standard floating point numbers.");
+            s->lastphase = float_phase;
+            for (i = 0; i < s->n; i++)
+              {
+                cdpe_get_x (s->root[i]->fvalue, s->root[i]->dvalue);
+                s->root[i]->frad = DBL_MAX;
+              }
+          }
+      }
 
       /* Check if we can manage to perform the recomputation of the
        * coefficients. If in floating point, switch do DPE if it fail.
@@ -377,7 +408,8 @@ mps_secular_ga_mpsolve (mps_context * s)
       /* Check thet we haven't passed the maximum number of allowed iterations */
       if (packet > s->max_pack)
         {
-          mps_error (s, 1, "Maximum number of iteration passed. Aborting.");
+          mps_error (s, "Maximum number of iteration passed. Aborting.");
+          mps_stop_timer (total_clock);
           return;
         }
       
@@ -434,7 +466,6 @@ mps_secular_ga_mpsolve (mps_context * s)
 
        /* Check if all the roots are approximated or, if we have done more than 4 packets
         * of iterations without finding all of them, if at least we are near to the result. */
-       // if (roots_computed >= MIN (s->n, s->n + 4 - packet))
          {
            if (mps_secular_ga_regenerate_coefficients (s))
              {

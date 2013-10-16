@@ -19,6 +19,10 @@
  * @brief Header file for libmps
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifndef MPS_CORE_H_
 #define MPS_CORE_H_
 
@@ -49,6 +53,31 @@ typedef const char * mps_string;
 /* Debug level */
 typedef int mps_debug_level;
 
+/* Handle systems where isnan and isinf are not available */
+#include <math.h>
+#ifndef isnan
+          # define isnan(x) \
+              (sizeof (x) == sizeof (long double) ? isnan_ld (x) \
+               : sizeof (x) == sizeof (double) ? isnan_d (x) \
+               : isnan_f (x))
+          static inline int isnan_f  (float       x) { return x != x; }
+          static inline int isnan_d  (double      x) { return x != x; }
+          static inline int isnan_ld (long double x) { return x != x; }
+          #endif
+
+#ifndef isinf
+          # define isinf(x) \
+              (sizeof (x) == sizeof (long double) ? isinf_ld (x) \
+               : sizeof (x) == sizeof (double) ? isinf_d (x) \
+               : isinf_f (x))
+          static inline int isinf_f  (float       x)
+          { return !isnan (x) && isnan (x - x); }
+          static inline int isinf_d  (double      x)
+          { return !isnan (x) && isnan (x - x); }
+          static inline int isinf_ld (long double x)
+          { return !isnan (x) && isnan (x - x); }
+#endif
+
 #include <mps/mt-types.h>
 
 #ifdef __cplusplus
@@ -71,6 +100,9 @@ typedef int mps_debug_level;
 
   /* monomial-poly.h */
   struct mps_monomial_poly;
+
+  /* monomial-matrix-poly.h */
+  struct mps_monomial_matrix_poly;
 
   /* polynomial.h */
   struct mps_polynomial;
@@ -117,6 +149,9 @@ typedef int mps_debug_level;
 
   /* monomial-poly.h */
   typedef struct mps_monomial_poly mps_monomial_poly;
+
+  /* monomial-matrix-poly.h */
+  typedef struct mps_monomial_matrix_poly mps_monomial_matrix_poly;
 
   /* polynomial.h */
   typedef struct mps_polynomial mps_polynomial;
@@ -465,6 +500,7 @@ typedef int mps_debug_level;
 #include <mps/input-buffer.h>
 #include <mps/context.h>
 #include <mps/monomial-poly.h>
+#include <mps/monomial-matrix-poly.h>
 #include <mps/secular-equation.h>
 #include <mps/chebyshev.h>
 #include <mps/approximation.h>
@@ -486,6 +522,7 @@ typedef int mps_debug_level;
 /* FUNCTIONS */
 
   /* functions in aberth.c */
+#ifdef _MPS_PRIVATE
   void mps_faberth (mps_context * s, mps_approximation * root, cplx_t abcorr);
   void mps_daberth (mps_context * s, mps_approximation * root, cdpe_t abcorr);
   void mps_maberth (mps_context * s, mps_approximation * root, mpc_t abcorr);
@@ -497,6 +534,7 @@ typedef int mps_debug_level;
   void mps_maberth_s_wl (mps_context * s, int j, mps_cluster * cluster, mpc_t abcorr,
                          pthread_mutex_t * aberth_mutex);
   void mps_mnewtis (mps_context * s);
+#endif
 
   /* functions in approximation.c */
   mps_approximation * mps_approximation_new (mps_context * s);
@@ -638,7 +676,7 @@ typedef int mps_debug_level;
   void mps_dump_cluster_structure (mps_context * s, FILE * outstr);
   mps_boolean mps_is_a_tty (FILE * stream);
   void mps_warn (mps_context * st, char *s);
-  void mps_error (mps_context * st, int args, ...);
+  void mps_error (mps_context * st, const char * format, ...);
   void mps_print_errors (mps_context * s);
 
 
@@ -676,14 +714,23 @@ typedef int mps_debug_level;
   void mps_general_dstart (mps_context * ctx, mps_polynomial * p);
   void mps_general_mstart (mps_context * ctx, mps_polynomial * p);
 
-  /* Routines of Input/Output in stio.c */
+  /* Routines of Input/Output in input-output.c */
   void mps_skip_comments (FILE * input_stream);
+  void mps_raise_parsing_error (mps_context * s, mps_input_buffer * buffer, 
+                         const char * token, 
+                         const char * message, ...);
+  mps_input_option mps_parse_option_line (mps_context * s, char *line, size_t length);
 
-  mps_input_option
-  mps_parse_option_line (mps_context * s, char *line, size_t length);
+  mps_polynomial * mps_parse_stream (mps_context * s, FILE * input_stream);
+  mps_polynomial * mps_parse_file   (mps_context * s, const char * path);
 
-  void mps_parse_stream (mps_context * s, FILE * input_stream);
-  void mps_parse_file   (mps_context * s, const char * path);
+  mps_polynomial * mps_monomial_poly_read_from_stream_v2 (mps_context * s, mps_input_buffer * buffer);
+  mps_monomial_poly * mps_monomial_poly_read_from_stream (mps_context * s, mps_input_buffer * buffer, 
+    mps_structure structure, mps_density density);
+  mps_chebyshev_poly * mps_chebyshev_poly_read_from_stream (mps_context * ctx, mps_input_buffer * buffer,
+    mps_structure structure, mps_density density);
+  mps_secular_equation * mps_secular_equation_read_from_stream (mps_context * ctx, mps_input_buffer * buffer,
+    mps_structure structure, mps_density density);
 
   /* Functions in horner.c */
   void mps_fhorner (mps_context * s, mps_monomial_poly * p, cplx_t x, cplx_t value);

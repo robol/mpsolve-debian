@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
+<ui version="5.0">
  <class>PolFileEditorDialog</class>
  <widget class="QDialog" name="PolFileEditorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>394</height>
+    <width>482</width>
+    <height>473</height>
    </rect>
   </property>
   <property name="windowTitle">

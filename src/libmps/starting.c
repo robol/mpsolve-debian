@@ -294,7 +294,7 @@ mps_fstart (mps_context * s, int n, mps_cluster_item * cluster_item,
     {
       /* If this is the first cluster select sigma = 0. In the other
        * case try to maximize starting points distance. */
-      if (!cluster || cluster_item->prev == NULL)
+      if ((cluster == NULL) || (cluster_item->prev == NULL))
         {
           sigma = s->last_sigma = MPS_STARTING_SIGMA;
         }
@@ -309,7 +309,7 @@ mps_fstart (mps_context * s, int n, mps_cluster_item * cluster_item,
   /* In the general case apply the Rouche-based criterion */
   mps_fcompute_starting_radii (s, n, cluster_item, clust_rad, g, eps, fap);
 
-  if (g != 0.0)
+  if (g != 0.0 && cluster != NULL)
     it_root = cluster->first;
 
   for (i = 0; i < s->n_radii; i++)
@@ -320,7 +320,7 @@ mps_fstart (mps_context * s, int n, mps_cluster_item * cluster_item,
 
       for (j = s->partitioning[i]; j < s->partitioning[i + 1]; j++)
         {
-          if (g != 0.0)
+          if (g != 0.0 && it_root)
             l = it_root->k;
           else
             l = j;
@@ -350,7 +350,7 @@ mps_fstart (mps_context * s, int n, mps_cluster_item * cluster_item,
 
       /* If the new radius of the cluster is relatively smaller, then
        * set the status component equal to 'o' (output) */
-      if (g != 0.0)
+      if (g != 0.0 && cluster)
         {
           rdpe_mul_d (tmp, eps, g);
           if (r * nzeros <= rdpe_get_d (tmp))
@@ -942,10 +942,16 @@ mps_mstart (mps_context * s, int n, mps_cluster_item * cluster_item,
               /* If they are too near we need to recompact them */
               if (rdpe_lt (rtmp2, rdpe_zero))
                 {
-                  MPS_DEBUG (s, "Recompacting cluster with root %d", i);
+                  mps_cluster_item * next = c_item->next;
+
+                  if (s->debug_level & MPS_DEBUG_CLUSTER)
+                    MPS_DEBUG (s, "Recompacting cluster with root %d", i);
+
                   need_recomputing = true;
                   mps_clusterization_remove_cluster (s, s->clusterization, c_item);
                   mps_cluster_insert_root (s, cluster, i);
+
+                  c_item = next;
                 }
             }
         }
@@ -1166,7 +1172,6 @@ mps_frestart (mps_context * s)
       g = mps_approximation_new (s);
       cplx_set (g->fvalue, sc);
 
-      // cplx_set (g, sc);
       for (j = 0; j < s->max_newt_it; j++)
         {
           mps_fnewton (s, MPS_POLYNOMIAL (p), g, corr);
@@ -1180,12 +1185,14 @@ mps_frestart (mps_context * s)
       if (j == s->max_newt_it)
         {
           MPS_DEBUG (s, "Exceeded maximum Newton iterations in frestart");
+          mps_approximation_free (s, g);
           return;
         }
       cplx_sub (ctmp, sc, g->fvalue);
       if (cplx_mod (ctmp) > sr)
         {
           MPS_DEBUG (s, "The gravity center falls outside the cluster");
+          mps_approximation_free (s, g);
           return;
         }
       /* Compute the coefficients of the shifted polynomial p(x+g)
@@ -1374,6 +1381,7 @@ mps_drestart (mps_context * s)
       if (j == s->max_newt_it)
         {
           MPS_DEBUG (s, "Exceeded maximum Newton iterations in frestart");
+          mps_approximation_free (s, g);
           return;
         }
       cdpe_sub (ctmp, sc, g->dvalue);
@@ -1381,6 +1389,7 @@ mps_drestart (mps_context * s)
       if (rdpe_gt (rtmp, sr))
         {
           MPS_DEBUG (s, "The gravity center falls outside the cluster");
+          mps_approximation_free (s, g);
           return;
         }
       /* Shift the variable and compute new approximations */
@@ -1449,18 +1458,21 @@ mps_cluster_check_detachment (mps_context * ctx, mps_clusterization * clusteriza
 
           if (rdpe_lt (distance_abs, radius))
             {
+              mps_cluster_item * next = item->next;
               if (ctx->debug_level & MPS_DEBUG_CLUSTER)
                 MPS_DEBUG (ctx, 
                   "Cluster containing root %d has not been correctly detached, reattaching.", k);
 
               mps_cluster_insert_root (ctx, cluster, k);
               mps_clusterization_remove_cluster (ctx, clusterization, item);
+
+              item = next;
             }
           else 
             {
               if (ctx->debug_level & MPS_DEBUG_CLUSTER)
                 MPS_DEBUG (ctx, 
-                  "Cluster containing root %d was successfuly detached.", k)
+                  "Cluster containing root %d was successfuly detached.", k);
 
               /* We need to stop marking this cluster as detached, that means
                * "experimental" in this context. */
@@ -1484,9 +1496,12 @@ mps_cluster_reattach_all_detached_clusters (mps_context * ctx, mps_clusterizatio
 
   /* Find cluster that have been detached from this and
    * attach them. */
-  for (item = clusterization->first; item != NULL; item = item->next)
+  for (item = clusterization->first; item != NULL; )
   {
+    /* Pre-cache the next cluster item se we don't ruin the 
+     * loop if we need to free the current one. */
     mps_cluster *d_cluster = item->cluster;
+    mps_cluster_item * next = item->next;
 
     if (item->detached == cluster_item)
     {
@@ -1497,6 +1512,8 @@ mps_cluster_reattach_all_detached_clusters (mps_context * ctx, mps_clusterizatio
       mps_cluster_insert_root (ctx, cluster, d_cluster->first->k);
       mps_clusterization_remove_cluster (ctx, clusterization, item);
     }
+
+    item = next;
   }
 }
 
@@ -1558,8 +1575,6 @@ mps_mrestart (mps_context * s)
       for (root = cluster->first; root != NULL; root = root->next)
         {                       /* looptst: */
           l = root->k;
-          // if (!s->root[l]->again && s->algorithm == MPS_ALGORITHM_STANDARD_MPSOLVE)
-          //   goto clean_detached_cluster;
 
           if (s->output_config->goal == MPS_OUTPUT_GOAL_COUNT)
             {

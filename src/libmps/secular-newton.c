@@ -15,6 +15,10 @@
 #include <limits.h>
 #include <math.h>
 
+#ifndef log2
+#define log2(x) (log(x) / LOG2)
+#endif
+
 #define MPS_2SQRT2 2.82842712474619009760
 #define KAPPA (MPS_POLYNOMIAL (sec)->degree * log2(MPS_POLYNOMIAL (sec)->degree) + 7 * 1.4151135 + 1)
 #define KAPPA_LINEAR (MPS_POLYNOMIAL (sec)->degree + 7 * 1.4142135623)
@@ -162,13 +166,6 @@ mps_secular_fnewton (mps_context * s, mps_polynomial * p, mps_approximation * ro
               asum += fabs (cplx_Re (ctmp2)) + fabs (cplx_Im (ctmp2));
            }
   	    }
-
-      if (i == MPS_PARALLEL_SUM_FAILED)
-        {
-          root->status = MPS_ROOT_STATUS_NOT_FLOAT;
-          root->again = false;
-          return;
-        }
 
       cplx_sub_eq (corr, cplx_one);
 

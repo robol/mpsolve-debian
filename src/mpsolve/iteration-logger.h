@@ -54,6 +54,8 @@ struct _MpsIterationLogger {
         double imag_center;
 
         gboolean exit;
+
+        pthread_mutex_t *drawing_lock;
 };
 
 struct _MpsIterationLoggerClass {

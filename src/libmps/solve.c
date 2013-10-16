@@ -245,7 +245,6 @@ mps_msrad (mps_context * s, mps_cluster * cluster, mpc_t sc, rdpe_t sr)
           if (s->debug_level & MPS_DEBUG_CLUSTER) 
             {
               MPS_DEBUG_RDPE (s, sr, "Super radius of the cluster");
-              // MPS_DEBUG_RDPE (s, rtmp, "rtmp");
             }
         }
     }
@@ -547,7 +546,7 @@ mps_fsolve (mps_context * s, mps_boolean * d_after_f)
   if (iter == s->max_pack)
     {
       mps_dump (s);
-      mps_error (s, 1,
+      mps_error (s,
                  "Float: reached the maximum number of packet iterations");
     }
   /* Otherwise exit since all the approximations are
@@ -893,7 +892,7 @@ mps_dsolve (mps_context * s, mps_boolean d_after_f)
   if (iter == s->max_pack)
     {
       mps_dump (s);
-      mps_error (s, 1,
+      mps_error (s,
                  "DPE: reached the maximum number of packet iterations");
     }
   /* Otherwise exit since all the approximations are
@@ -1183,7 +1182,7 @@ mps_msolve (mps_context * s)
 
   if (iter == s->max_pack)
     {
-      mps_error (s, 1, "MP: reached the maximum number of packet iteration");
+      mps_error (s, "MP: reached the maximum number of packet iteration");
     }
 
   if (s->DOLOG)

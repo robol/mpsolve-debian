@@ -61,7 +61,8 @@ mps_standard_mpsolve (mps_context * s)
   /* == 2 ==  Resume from pre-computed roots */
   if (s->resume) 
     {
-      mps_error (s, 1, "Resume not supported yet");
+      mps_error (s, "Resume not supported yet");
+      mps_stop_timer (my_timer);
       return;
     }
 
@@ -80,7 +81,10 @@ mps_standard_mpsolve (mps_context * s)
 
   /* Check for errors in check data */
   if (mps_context_has_errors (s))
+  {
+    mps_stop_timer (my_timer);
     return;
+  }
 
   rdpe_set_2dl (s->eps_out, 1.0, - s->output_config->prec);
 
@@ -221,7 +225,7 @@ mps_standard_mpsolve (mps_context * s)
       if (s->over_max)
         {
           s->over_max = true;
-          /* mps_error (s, 1, "Reached the maximum working precision"); */
+          /* mps_error (s, "Reached the maximum working precision"); */
           MPS_DEBUG (s, "Reached the maximum working precision");
           goto exit_sub;
         }
@@ -240,7 +244,7 @@ exit_sub:
   if (computed && s->clusterization->n < s->n)
     if (!mps_inclusion (s))
       {
-        mps_error (s, 1, "Unable to compute inclusion disks");
+        mps_error (s, "Unable to compute inclusion disks");
         return;
       }
 
@@ -438,10 +442,10 @@ mps_check_data (mps_context * s, char *which_case)
   if (!MPS_IS_MONOMIAL_POLY (s->active_poly))
     {
       if (s->output_config->multiplicity)
-        mps_error (s, 1,
+        mps_error (s,
                    "Multiplicity detection not yet implemented for user polynomial");
       if (s->output_config->root_properties)
-        mps_error (s, 1,
+        mps_error (s,
                    "Real/imaginary detection not yet implemented for user polynomial");
       *which_case = 'd';
       return;
@@ -500,17 +504,15 @@ mps_check_data (mps_context * s, char *which_case)
         }
       else if (MPS_STRUCTURE_IS_RATIONAL (s->active_poly->structure))
         {
-          mps_error (s, 1,
+          mps_error (s,
                     "The real/imaginary option has not been yet implemented for rational input");
           return;
-          s->sep = 0.0;
         }
       else
         {
-          mps_error (s, 1, "The input polynomial has neither integer nor rational "
+          mps_error (s, "The input polynomial has neither integer nor rational "
                            "coefficients: unable to perform real/imaginary options");
           return;
-          s->sep = 0.0;
         }
     }
 

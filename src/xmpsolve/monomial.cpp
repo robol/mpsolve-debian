@@ -31,6 +31,7 @@ Monomial::Monomial(double coefficient, int exponent)
     mpq_set_si(imagRationalCoefficient, 0, 0);
 
     m_degree = exponent;
+    m_valid = true;
 
     // Canonicalize the rational number
     mpq_canonicalize(realRationalCoefficient);
@@ -41,6 +42,8 @@ Monomial::Monomial(const Monomial &other)
 {
     mpq_init(realRationalCoefficient);
     mpq_init(imagRationalCoefficient);
+
+    m_valid = other.m_valid;
 
     *this = other;
 }
@@ -337,7 +340,7 @@ void
 Monomial::setError(QString message)
 {
     m_errorMessage = message;
-    m_valid = FALSE;
+    m_valid = false;
 }
 
 
@@ -377,6 +380,13 @@ Monomial::addToMonomialPoly(mps_context *ctx, mps_monomial_poly *poly)
 {
     mps_monomial_poly_set_coefficient_q(ctx, poly, degree(),
         realRationalCoefficient, imagRationalCoefficient);
+}
+
+void
+Monomial::addToChebyshevPoly(mps_context *ctx, mps_chebyshev_poly *poly)
+{
+    mps_chebyshev_poly_set_coefficient_q(ctx, poly, degree(),
+                                         realRationalCoefficient, imagRationalCoefficient);
 }
 
 Monomial&
