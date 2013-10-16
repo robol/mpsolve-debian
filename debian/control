@@ -49,6 +49,18 @@ Description: Multiprecision polynomial solver
  .
  This package contains the development headers and the .so library.
 
+Package: python-mpsolve
+Architecture: any
+Section: universe/python
+Depends: ${misc:Depends}, libmps3 (= ${binary:Version})
+Description: Multiprecision polynomial solver
+ A polynomial rootfinder that can determine arbitrary precision approximations
+ with guaranteed inclusion radii.
+ It supports exploiting of polynomial structures such as sparsisty and allows
+ for polynomial implicitly defined or in some non standard basis.
+ .
+ This package contains the Python interface to libmps. 
+
 Package: xmpsolve
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libmps3 (= ${binary:Version})
