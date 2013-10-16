@@ -18786,7 +18786,7 @@ fi
 	if test "$have_qt5" == "yes"; then :
 
 		# Check for needed programs
-		for ac_prog in uic
+		for ac_prog in uic-qt5 uic
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -18828,7 +18828,7 @@ fi
   test -n "$UIC" && break
 done
 
-		for ac_prog in moc
+		for ac_prog in moc-qt5 moc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -18870,7 +18870,7 @@ fi
   test -n "$MOC" && break
 done
 
-		for ac_prog in rcc
+		for ac_prog in rcc-qt5 rcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -18931,7 +18931,7 @@ fi
 	# to build the interface are not available.
 	if test "$have_qt4" == "yes" && test "$have_qt5" == "no"; then :
 
-                for ac_prog in uic-qt4
+                for ac_prog in uic-qt4 uic
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -18973,7 +18973,7 @@ fi
   test -n "$UIC" && break
 done
 
-                for ac_prog in moc-qt4
+                for ac_prog in moc-qt4 moc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -19015,7 +19015,7 @@ fi
   test -n "$MOC" && break
 done
 
-		for ac_prog in rcc-qt4
+		for ac_prog in rcc-qt4 rcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
