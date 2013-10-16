@@ -1,3 +1,9 @@
+mpsolve (3.1.4-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Leonardo Robol <leo@robol.it>  Wed, 16 Oct 2013 16:23:36 +0200
+
 mpsolve (3.1.3-2) unstable; urgency=low
 
   * Be less strict with tests error checking. 

@@ -9,8 +9,10 @@ Build-Depends: debhelper (>= 7.0.0), autotools-dev,
 	libcairo2-dev,
 	libqt4-dev,
 	libtcmalloc-minimal4 | libtcmalloc-minimal0,
+        cython,
+        python-dev
 Standards-Version: 3.9.4
-Homepage: http://riccati.dm.unipi.it/mpsolve/
+Homepage: http://mpsolve.dm.unipi.it/mpsolve/
 Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git
 
 Package: mpsolve
