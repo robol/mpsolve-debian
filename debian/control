@@ -10,7 +10,8 @@ Build-Depends: debhelper (>= 7.0.0), autotools-dev,
 	libqt4-dev,
 	libtcmalloc-minimal4 | libtcmalloc-minimal0,
         cython,
-        python-dev
+        python-dev,
+	dh-python
 Standards-Version: 3.9.4
 Homepage: http://mpsolve.dm.unipi.it/mpsolve/
 Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git
@@ -51,8 +52,8 @@ Description: Multiprecision polynomial solver
 
 Package: python-mpsolve
 Architecture: any
-Section: universe/python
-Depends: ${misc:Depends}, libmps3 (= ${binary:Version})
+Section: python
+Depends: ${misc:Depends}, libmps3 (= ${binary:Version}), ${shlibs:Depends}, ${python:Depends}
 Description: Multiprecision polynomial solver
  A polynomial rootfinder that can determine arbitrary precision approximations
  with guaranteed inclusion radii.
