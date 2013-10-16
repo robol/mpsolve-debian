@@ -299,6 +299,7 @@ QT_LDFLAGS = @QT_LDFLAGS@
 QT_LIBS = @QT_LIBS@
 QT_PROGRAMS = @QT_PROGRAMS@
 RANLIB = @RANLIB@
+RCC = @RCC@
 ROOTS_OF_UNITY_PROGRAMS = @ROOTS_OF_UNITY_PROGRAMS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -372,6 +373,7 @@ EXTRA_DIST = mpsolve.pyx mpsolve.pxd
 nodist_mpsolve_la_SOURCES = $(builddir)/mpsolve.c
 mpsolve_la_LDFLAGS = $(AM_LDFLAGS) $(MPSOLVE_LDFLAGS) -avoid-version -module
 mpsolve_la_LIBADD = $(top_builddir)/src/libmps/libmps.la
+@HAVE_CYTHON_TRUE@CLEANFILES = mpsolve.c
 all: all-am
 
 .SUFFIXES:
@@ -598,6 +600,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

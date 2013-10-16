@@ -104,7 +104,7 @@ am__xmpsolve_SOURCES_DIST = main.cpp polynomial.cpp monomial.cpp \
 	root.cpp polynomialparser.cpp polynomialsolver.cpp \
 	mainwindow.cpp rootsmodel.cpp polfileeditordialog.cpp \
 	polsyntaxhighlighter.cpp mpsolveworker.cpp rootsrenderer.cpp \
-	xmpsolve.rc
+	resources.qrc xmpsolve.rc
 @HAVE_UI_TRUE@am__objects_1 = xmpsolve-main.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-polynomial.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-monomial.$(OBJEXT) \
@@ -117,10 +117,11 @@ am__xmpsolve_SOURCES_DIST = main.cpp polynomial.cpp monomial.cpp \
 @HAVE_UI_TRUE@	xmpsolve-polsyntaxhighlighter.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-mpsolveworker.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-rootsrenderer.$(OBJEXT)
-@HAVE_UI_TRUE@@HAVE_WINDRES_TRUE@am__objects_3 = xmpsolve.$(OBJEXT)
+am__objects_3 =
+@HAVE_UI_TRUE@@HAVE_WINDRES_TRUE@am__objects_4 = xmpsolve.$(OBJEXT)
 @HAVE_UI_TRUE@am_xmpsolve_OBJECTS = $(am__objects_1) $(am__objects_2) \
-@HAVE_UI_TRUE@	$(am__objects_3)
-@HAVE_UI_TRUE@am__objects_4 = xmpsolve-polynomialparser_moc.$(OBJEXT) \
+@HAVE_UI_TRUE@	$(am__objects_3) $(am__objects_4)
+@HAVE_UI_TRUE@am__objects_5 = xmpsolve-polynomialparser_moc.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-polynomialsolver_moc.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-mainwindow_moc.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-rootsmodel_moc.$(OBJEXT) \
@@ -128,8 +129,11 @@ am__xmpsolve_SOURCES_DIST = main.cpp polynomial.cpp monomial.cpp \
 @HAVE_UI_TRUE@	xmpsolve-polsyntaxhighlighter_moc.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-mpsolveworker_moc.$(OBJEXT) \
 @HAVE_UI_TRUE@	xmpsolve-rootsrenderer_moc.$(OBJEXT)
-@HAVE_UI_TRUE@am__objects_5 = $(am__objects_4)
-@HAVE_UI_TRUE@nodist_xmpsolve_OBJECTS = $(am__objects_5)
+@HAVE_UI_TRUE@am__objects_6 = $(am__objects_5)
+@HAVE_UI_TRUE@am__objects_7 = xmpsolve-resources_qrc.$(OBJEXT)
+@HAVE_UI_TRUE@am__objects_8 = $(am__objects_7)
+@HAVE_UI_TRUE@nodist_xmpsolve_OBJECTS = $(am__objects_6) \
+@HAVE_UI_TRUE@	$(am__objects_8)
 xmpsolve_OBJECTS = $(am_xmpsolve_OBJECTS) $(nodist_xmpsolve_OBJECTS)
 am__DEPENDENCIES_1 =
 @HAVE_UI_TRUE@xmpsolve_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -337,6 +341,7 @@ QT_LDFLAGS = @QT_LDFLAGS@
 QT_LIBS = @QT_LIBS@
 QT_PROGRAMS = @QT_PROGRAMS@
 RANLIB = @RANLIB@
+RCC = @RCC@
 ROOTS_OF_UNITY_PROGRAMS = @ROOTS_OF_UNITY_PROGRAMS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -449,6 +454,9 @@ top_srcdir = @top_srcdir@
 @HAVE_UI_TRUE@	mainwindow.ui \
 @HAVE_UI_TRUE@	polfileeditordialog.ui
 
+@HAVE_UI_TRUE@qrc_files = \
+@HAVE_UI_TRUE@	resources.qrc
+
 @HAVE_UI_TRUE@headers = \
 @HAVE_UI_TRUE@	rootsrenderer.h  \
 @HAVE_UI_TRUE@	rootsmodel.h  \
@@ -463,17 +471,21 @@ top_srcdir = @top_srcdir@
 @HAVE_UI_TRUE@	mpsolveworker.h
 
 @HAVE_UI_TRUE@moc_files = $(pure_source_files:.cpp=_moc.cpp)
+@HAVE_UI_TRUE@qrc_gen_files = $(qrc_files:.qrc=_qrc.cpp)
 @HAVE_UI_TRUE@xmpsolve_SOURCES = \
 @HAVE_UI_TRUE@	$(other_source_files) \
 @HAVE_UI_TRUE@	$(pure_source_files) \
+@HAVE_UI_TRUE@	$(qrc_files) \
 @HAVE_UI_TRUE@	$(resources)
 
 @HAVE_UI_TRUE@nodist_xmpsolve_SOURCES = \
-@HAVE_UI_TRUE@	$(moc_files)
+@HAVE_UI_TRUE@	$(moc_files) \
+@HAVE_UI_TRUE@	$(qrc_gen_files)
 
 @HAVE_UI_TRUE@CLEANFILES = \
 @HAVE_UI_TRUE@	$(moc_files) \
-@HAVE_UI_TRUE@	$(ui_files)
+@HAVE_UI_TRUE@	$(ui_files) \
+@HAVE_UI_TRUE@	$(qrc_gen_files) 
 
 @HAVE_UI_TRUE@EXTRA_DIST = $(icon_DATA) \
 @HAVE_UI_TRUE@	$(headers) \
@@ -482,7 +494,8 @@ top_srcdir = @top_srcdir@
 @HAVE_UI_TRUE@	xmpsolve.1
 
 @HAVE_UI_TRUE@BUILT_SOURCES = $(moc_files) \
-@HAVE_UI_TRUE@	$(ui_files)
+@HAVE_UI_TRUE@	$(ui_files) \
+@HAVE_UI_TRUE@	$(qrc_gen_files) 
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -598,6 +611,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-polynomialparser_moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-polynomialsolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-polynomialsolver_moc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-resources_qrc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-root.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-rootsmodel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmpsolve-rootsmodel_moc.Po@am__quote@
@@ -904,6 +918,20 @@ xmpsolve-rootsrenderer_moc.obj: rootsrenderer_moc.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='rootsrenderer_moc.cpp' object='xmpsolve-rootsrenderer_moc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xmpsolve_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmpsolve-rootsrenderer_moc.obj `if test -f 'rootsrenderer_moc.cpp'; then $(CYGPATH_W) 'rootsrenderer_moc.cpp'; else $(CYGPATH_W) '$(srcdir)/rootsrenderer_moc.cpp'; fi`
+
+xmpsolve-resources_qrc.o: resources_qrc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xmpsolve_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmpsolve-resources_qrc.o -MD -MP -MF $(DEPDIR)/xmpsolve-resources_qrc.Tpo -c -o xmpsolve-resources_qrc.o `test -f 'resources_qrc.cpp' || echo '$(srcdir)/'`resources_qrc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xmpsolve-resources_qrc.Tpo $(DEPDIR)/xmpsolve-resources_qrc.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='resources_qrc.cpp' object='xmpsolve-resources_qrc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xmpsolve_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmpsolve-resources_qrc.o `test -f 'resources_qrc.cpp' || echo '$(srcdir)/'`resources_qrc.cpp
+
+xmpsolve-resources_qrc.obj: resources_qrc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xmpsolve_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmpsolve-resources_qrc.obj -MD -MP -MF $(DEPDIR)/xmpsolve-resources_qrc.Tpo -c -o xmpsolve-resources_qrc.obj `if test -f 'resources_qrc.cpp'; then $(CYGPATH_W) 'resources_qrc.cpp'; else $(CYGPATH_W) '$(srcdir)/resources_qrc.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/xmpsolve-resources_qrc.Tpo $(DEPDIR)/xmpsolve-resources_qrc.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='resources_qrc.cpp' object='xmpsolve-resources_qrc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xmpsolve_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmpsolve-resources_qrc.obj `if test -f 'resources_qrc.cpp'; then $(CYGPATH_W) 'resources_qrc.cpp'; else $(CYGPATH_W) '$(srcdir)/resources_qrc.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1218,6 +1246,10 @@ uninstall-man: uninstall-man1
 @HAVE_UI_TRUE@ui_%.h: @srcdir@/%.ui
 @HAVE_UI_TRUE@	$(AM_V_GEN) 
 @HAVE_UI_TRUE@	$(AM_V_at) $(UIC) $< -o $@
+
+@HAVE_UI_TRUE@%_qrc.cpp: @srcdir@/%.qrc
+@HAVE_UI_TRUE@	$(AM_V_GEN)
+@HAVE_UI_TRUE@	$(AM_V_at) $(RCC) $< -o $@
 
 # Windows resources
 @HAVE_UI_TRUE@@HAVE_WINDRES_TRUE@.rc.o:
