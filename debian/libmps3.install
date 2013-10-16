@@ -1,1 +1,3 @@
 /usr/lib/libmps.so.*
+/usr/share/mime/packages/*
+/usr/share/mime-info/*
