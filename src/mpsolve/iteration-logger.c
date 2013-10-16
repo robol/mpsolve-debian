@@ -8,6 +8,7 @@
 #include <iteration-logger.h>
 #include <mps/mps.h>
 #include <math.h>
+#include <pthread.h>
 
 G_DEFINE_TYPE (MpsIterationLogger, mps_iteration_logger, GTK_TYPE_WINDOW);
 
@@ -19,6 +20,13 @@ mps_iteration_logger_dispose (GObject *object)
   MpsIterationLogger * logger = MPS_ITERATION_LOGGER (object);
   if (logger->timeout_source <= 0 || !g_source_remove (logger->timeout_source))
     g_warning ("Source not found");
+
+  if (logger->drawing_lock)
+  {
+    pthread_mutex_destroy (logger->drawing_lock);
+    logger->drawing_lock = NULL;
+  }
+
   logger->exit = TRUE;
 }
 
@@ -43,6 +51,9 @@ mps_iteration_logger_init (MpsIterationLogger * logger)
   logger->drawing_area = NULL;
   logger->exit = FALSE;
 
+  logger->drawing_lock = mps_new (pthread_mutex_t);
+  pthread_mutex_init (logger->drawing_lock, NULL);
+
   /* Setup neutral zomming */
   logger->zooming = false;
   logger->real_center = 0.0;
@@ -50,7 +61,10 @@ mps_iteration_logger_init (MpsIterationLogger * logger)
   logger->x_scale = logger->y_scale = 1.0;
 
   logger->degree = 0;
+
+  pthread_mutex_lock(logger->drawing_lock);
   logger->approximations = NULL;
+  pthread_mutex_unlock(logger->drawing_lock);
 
   logger->drawing = FALSE;
 
@@ -69,15 +83,16 @@ void
 mps_iteration_logger_set_mps_context (MpsIterationLogger * logger, mps_context * context)
 {
   logger->ctx = context;
-  // mps_iteration_logger_set_roots (logger, logger->ctx->root, mps_context_get_degree (context));
 }
 
 void
 mps_iteration_logger_set_roots (MpsIterationLogger * logger, mps_approximation ** approximations, int n)
 {
+  pthread_mutex_lock (logger->drawing_lock);
   logger->approximations = approximations;
   logger->degree = n;
   logger->ctx = NULL;
+  pthread_mutex_unlock (logger->drawing_lock);
 }
 
 static void mps_iteration_logger_on_drawing_area_draw (GtkWidget* , cairo_t*, MpsIterationLogger * logger);
@@ -235,6 +250,8 @@ mps_iteration_logger_on_drawing_area_draw (GtkWidget * widget,
     return;
   }
 
+  pthread_mutex_lock (logger->drawing_lock);
+
   width = gtk_widget_get_allocated_width (widget);
   height = gtk_widget_get_allocated_height (widget);
 
@@ -278,10 +295,10 @@ mps_iteration_logger_on_drawing_area_draw (GtkWidget * widget,
           {
             case mp_phase:
               mpc_get_cplx (approximations[i]->fvalue, approximations[i]->mvalue);
-
+              /* Falling through */
             case dpe_phase:
               cdpe_get_x (approximations[i]->fvalue, approximations[i]->dvalue);
-
+              /* Falling through */
             default:
               x = mps_iteration_logger_x_points_to_coords (logger, 
                 cplx_Re (approximations[i]->fvalue));
@@ -349,6 +366,7 @@ mps_iteration_logger_on_drawing_area_draw (GtkWidget * widget,
     }
 
   logger->drawing = FALSE;
+  pthread_mutex_unlock (logger->drawing_lock);
 }
 
 static gboolean 

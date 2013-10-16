@@ -2,7 +2,7 @@ NULL =
 
 bin_PROGRAMS = mpsolve
 
-man_MANS = ${srcdir}/mpsolve.1
+man_MANS = ${builddir}/mpsolve.1
 
 EXTRA_DIST = mpsolve.1
 
@@ -11,6 +11,7 @@ mpsolve_CFLAGS = \
 	-I. \
 	$(GMP_CFLAGS) \
 	$(GTK_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 mpsolve_SOURCES = \

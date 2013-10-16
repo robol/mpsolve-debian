@@ -110,9 +110,6 @@ mps_context_free (mps_context * s)
   free (s->input_config);
   free (s->output_config);
 
-  /* Check if secular equation or monomial poly need to be freed */
-  if (s->active_poly != NULL)
-    mps_polynomial_free (s, s->active_poly);
   s->active_poly = NULL;
 
   if (s->secular_equation)
@@ -155,7 +152,7 @@ mps_context_set_input_poly (mps_context * s, mps_polynomial * p)
 
   if (p->degree < 0)
   {
-    mps_error (s, 1, "Polynomial degree should be positive");
+    mps_error (s, "Polynomial degree should be positive");
     return;
   }
   
@@ -248,6 +245,8 @@ mps_context_set_poly_i (mps_context * s, int *coeff, long unsigned int n)
     {
       mpq_set_si (p->initial_mqp_r[i], coeff[i], 1U);
     }
+
+  mps_context_set_input_poly (s, MPS_POLYNOMIAL (p));
 
   return 0;
 }

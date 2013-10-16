@@ -40,6 +40,7 @@ static mps_boolean logger_closed = false;
 #endif
 
 mps_context * s = NULL;
+mps_polynomial * poly = NULL;
 
 #ifndef __WINDOWS
 #include <signal.h>
@@ -219,6 +220,8 @@ cleanup_context (mps_context * ctx, void * user_data)
 #endif  
 
   /* Free used data */
+  if (poly) 
+    mps_polynomial_free (ctx, poly);
   mps_context_free (ctx);
 
   s = NULL;
@@ -260,6 +263,10 @@ main (int argc, char **argv)
   mps_opt *opt;
   mps_phase phase = no_phase;
 
+  /* This will be true if the user has explicitely selected the algorithm, 
+     otherwise we will be using our own heuristic. */
+  mps_boolean explicit_algorithm_selection = false;
+
   opt = NULL;
   while ((mps_getopts (&opt, &argc, &argv, MPSOLVE_GETOPT_STRING)))
     {
@@ -269,7 +276,7 @@ main (int argc, char **argv)
           {
             FILE* logstr = fopen (opt->optvalue, "w");
             if (!logstr)
-              mps_error (s, 1, "Cannot open selected log file.");
+              mps_error (s, "Cannot open selected log file.");
             mps_context_set_log_stream (s, logstr);
           }
           break;
@@ -277,7 +284,7 @@ main (int argc, char **argv)
         case 'v':
 
 #ifdef HAVE_CONFIG_H
-          printf ("MPSolve " VERSION "\n");
+          printf (PACKAGE_STRING "\n");
 #else
           printf ("MPSolve 3.0\n");
 #endif
@@ -288,7 +295,10 @@ main (int argc, char **argv)
         case 'O':
           /* Select the desired output format */
           if (!opt->optvalue)
-            mps_error (s, 1, "An argument is needed for option 'O'");
+            {
+              mps_error (s, "An argument is needed for option 'O'");
+              break;
+            }
           
           switch (*opt->optvalue)
             {
@@ -318,7 +328,7 @@ main (int argc, char **argv)
               mps_context_set_output_format (s, MPS_OUTPUT_FORMAT_COMPACT);
               break;
             default:
-              mps_error (s, 1, "The selected output format is not supported");
+              mps_error (s, "The selected output format is not supported");
               break;
             }
 
@@ -359,11 +369,11 @@ main (int argc, char **argv)
                 s->output_config->search_set = MPS_SEARCH_SET_CUSTOM;
                 break;
               default:
-                mps_error (s, 3, "Bad search set switch: ", opt->optvalue,
+                mps_error (s, "Bad search set switch: ", opt->optvalue,
                            ", use a|r|l|u|d|i|o|R|I|U");
               }
             if (strlen (opt->optvalue) != 1)
-              mps_error (s, 2, "Bad set: ", opt->optvalue);
+              mps_error (s, "Bad set: ", opt->optvalue);
             break;
 
             /* select multiplicity */
@@ -377,11 +387,11 @@ main (int argc, char **argv)
                 s->output_config->multiplicity = false;
                 break;
               default:
-                mps_error (s, 3, "Bad multiplicity switch: ", opt->optvalue,
+                mps_error (s, "Bad multiplicity switch: ", opt->optvalue,
                            ", use +|-");
               }
             if (strlen (opt->optvalue) != 3)
-              mps_error (s, 2, "Bad multiplicity option: ", opt->optvalue);
+              mps_error (s, "Bad multiplicity option: ", opt->optvalue);
             break;
 
             /* detection */
@@ -402,18 +412,18 @@ main (int argc, char **argv)
                   MPS_OUTPUT_PROPERTY_IMAGINARY;
                 break;
               default:
-                mps_error (s, 3, "Bad detection switch: ", opt->optvalue,
+                mps_error (s, "Bad detection switch: ", opt->optvalue,
                            ", use n|r|i|b");
               }
             if (strlen (opt->optvalue) != 1)
-              mps_error (s, 2, "Bad detection option: ", opt->optvalue);
+              mps_error (s, "Bad detection option: ", opt->optvalue);
             break;
 
             /* I/O streams */
           case 'R':
             s->rtstr = fopen (opt->optvalue, "r");
             if (s->rtstr == NULL)
-              mps_error (s, 2, "Cannot open roots file: ", opt->optvalue);
+              mps_error (s, "Cannot open roots file: ", opt->optvalue);
             s->resume = true;
             break;
 
@@ -428,17 +438,19 @@ main (int argc, char **argv)
                 s->chkrad = false;
                 break;
               default:
-                mps_error (s, 3, "Bad check switch: ", opt->optvalue,
+                mps_error (s, "Bad check switch: ", opt->optvalue,
                            ", use R|r");
               }
             if (strlen (opt->optvalue) != 1)
-              mps_error (s, 2, "Bad check option: ", opt->optvalue);
+              mps_error (s, "Bad check option: ", opt->optvalue);
             break;
 
             
         case 'a':
           switch (*opt->optvalue)
             {
+	      explicit_algorithm_selection = true;
+
             case 'u':
               mps_context_select_algorithm (s, MPS_ALGORITHM_STANDARD_MPSOLVE);
               break;
@@ -446,7 +458,7 @@ main (int argc, char **argv)
               mps_context_select_algorithm (s, MPS_ALGORITHM_SECULAR_GA);
               break;
             default:
-              mps_error (s, 1, "The selected algorithm is not supported");
+              mps_error (s, "The selected algorithm is not supported");
               break;
             }
           break;
@@ -472,7 +484,7 @@ main (int argc, char **argv)
               mps_context_set_output_goal (s, MPS_OUTPUT_GOAL_COUNT);
               break;
             default:
-              mps_error (s, 1, "The selected goal does not exists");
+              mps_error (s, "The selected goal does not exists");
               break;
             }
           break;
@@ -520,7 +532,7 @@ main (int argc, char **argv)
                   break;
                 default:
                   sprintf (output, "Unrecognized debug option: %c", *(opt->optvalue - 1));
-                  mps_error (s, 1, output);
+                  mps_error (s, output);
                   break;
                 }
             }
@@ -590,14 +602,31 @@ main (int argc, char **argv)
 
   if (!infile)
     {
-      mps_error (s, 1, "Cannot open input file for read, aborting.");
+      mps_error (s, "Cannot open input file for read, aborting.");
       mps_print_errors (s);
       return EXIT_FAILURE;
     }
 
   /* Parse the input stream and if a polynomial is given as output, 
    * allocate also a secular equation to be used in regeneration */
-  mps_parse_stream (s, infile);
+  poly = mps_parse_stream (s, infile);
+  if (!poly)
+    {
+      mps_error (s, "Error while parsing the polynomial, aborting.");
+      mps_print_errors (s);
+      return EXIT_FAILURE;
+    }
+  else
+    mps_context_set_input_poly (s, poly);
+
+  /* Perform some heuristic for the algorithm selection, but only if the user
+   * hasn't explicitely selected one. */
+  if (! explicit_algorithm_selection)
+    {
+      mps_context_select_algorithm (s, (MPS_IS_MONOMIAL_POLY (poly) && 
+					MPS_DENSITY_IS_SPARSE (poly->density)) ? 
+				    MPS_ALGORITHM_STANDARD_MPSOLVE : MPS_ALGORITHM_SECULAR_GA );
+    }
 
   /* Close the file if it's not stdin */
   if (argc == 2)

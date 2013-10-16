@@ -15,6 +15,10 @@
 #include <math.h>
 #include <limits.h>
 
+#ifndef log2
+#define log2(x) (log(x) / LOG2)
+#endif
+
 static int 
 get_approximated_bits (mps_approximation * appr)
 {
@@ -41,7 +45,10 @@ evaluate_root_conditioning (mps_context * ctx, mps_polynomial * p, mps_approxima
       mpc_rmod (module, value);
 
       /* Get the relative error of this evaluation */
-      rdpe_div_eq (error, module);
+      if (! rdpe_eq_zero (module))
+        rdpe_div_eq (error, module);
+      else
+        rdpe_set_d (error, DBL_EPSILON * p->degree);
 
       /* log2(error) + wp - log(n) is a good estimate of log(k) */
       rdpe_set_d (root_conditioning[i], rdpe_log (error) / LOG2 + appr[i]->wp - log2(n));
@@ -144,6 +151,12 @@ mps_improve (mps_context * ctx)
   rdpe_t * root_conditioning = NULL;
   ctx->operation = MPS_OPERATION_REFINEMENT;
 
+  /* We need to be able to evaluate the Newton correction in a point
+   * in order to perform the refinement. This is not necessary true
+   * for custom polynomial types, so add a check in here */
+  if (p->mnewton == NULL && p->density != MPS_DENSITY_USER)
+    return;
+
   /* Set lastphase to mp */
   ctx->lastphase = mp_phase;
 
@@ -192,7 +205,6 @@ mps_improve (mps_context * ctx)
               data->precision = current_precision;
 
               mps_thread_pool_assign (ctx, NULL, improve_root_wrapper, data);
-              // improve_root_wrapper (data);
             }
           }
 
@@ -216,7 +228,7 @@ mps_improve (mps_context * ctx)
       if (current_precision > p->prec && p->prec != 0)
         {
           ctx->over_max = true;
-          return;
+          goto cleanup;
         }
 
       /* Increase data prec max that will be useful to the end user to know
@@ -226,4 +238,8 @@ mps_improve (mps_context * ctx)
       if (ctx->debug_level & MPS_DEBUG_IMPROVEMENT)
         MPS_DEBUG (ctx, "Increasing precision to %ld", current_precision);
     }
+
+cleanup:    
+
+  free (root_conditioning);
 }

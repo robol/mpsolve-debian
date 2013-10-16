@@ -1,8 +1,8 @@
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
+#                                               -*- Autoconf -*- Process this file with autoconf 
+# to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([MPSolve], [3.1.3], [robol@poisson.phc.unipi.it])
+AC_INIT([MPSolve], [3.1.4], [robol@poisson.phc.unipi.it])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
@@ -10,7 +10,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT
 
-AM_INIT_AUTOMAKE([dist-bzip2])
+AM_INIT_AUTOMAKE([dist-bzip2 -Wno-portability])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
@@ -21,10 +21,14 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 #
 
 # Checks for needed compilers
-AC_PROG_CXX
 AC_PROG_CC
-AM_PROG_CC_C_O
+AC_PROG_CXX
 AC_PROG_CC_C99
+AM_PROG_CC_C_O
+AC_C_INLINE
+
+# We need vsnprintf for signaling error in the code. 
+AX_FUNC_SNPRINTF
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
@@ -56,9 +60,17 @@ esac
 AC_MSG_RESULT([$platform_win32])
 
 # That's make detecting Windows real easy...
-if test x$platform_win32 = xyes; then
+if test "$platform_win32" = yes; then
   CFLAGS="$CFLAGS -D__WINDOWS"
+  LDFLAGS="$LDFLAGS -mwindows"
+
+  # In this case check if we have windres compiler
+  AC_CHECK_TOOL([WINDRES], [windres])
 fi
+
+AM_CONDITIONAL([WINDOWS_BUILD], [test "$platform_win32" == "yes"])
+AM_CONDITIONAL([HAVE_WINDRES], [test "$WINDRES" != ""])
+
 
 # Add GMP_CFLAGS and GMP_LIBS to CFLAGS and LDFLAGS in case they are set.
 CFLAGS="$GMP_CFLAGS $CFLAGS"
@@ -135,16 +147,40 @@ AC_CHECK_LIB([m], [pow])
 # cricital section, but this have not be done yet. Note, however, that is still possible
 # to run MPSolve on Windows by using pthread compatilibity layer that are freely available
 # on the Internet. 
-AX_PTHREAD([], [
-  AC_MSG_ERROR([Pthread library not found. Please set PTHREAD_CFLAGS and PTHREAD_LIBS correctly for your setup])
-])
+  AX_PTHREAD([], [
+    AC_MSG_ERROR([Pthread library not found. Please set PTHREAD_CFLAGS and PTHREAD_LIBS correctly for your setup])
+  ])
+  CC="$PTHREAD_CC"
 
 # Set the correct PTHREAD flags and, if needed, change the compiler to one that is pthread-enabled.
-CC="$PTHREAD_CC"
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LDFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(CC)
+
+# Check if we have support for sysconf() to get the number of processors
+AC_MSG_CHECKING([if sysconf(_SC_NPROCESSORS_ONLN) is supported])
+AC_COMPILE_IFELSE([
+    AC_LANG_SOURCE(
+    [[
+      #include <unistd.h>
+      int main() {
+        int cores = sysconf(_SC_NPROCESSORS_ONLN);
+        return 0;
+      }
+    ]]
+    )
+   ], 
+   [have_sysconf=yes], 
+   [have_sysconf=no]
+)
+
+AC_MSG_RESULT([$have_sysconf])
+AS_IF([test "$have_sysconf" == "yes"], [
+  AC_DEFINE([HAVE_SYSCONF], [1], [
+    Defined if sysconf(_SC_NPROCESSORS_ONLN) is supported]
+  )
+])
 
 #
 # ===== OPTIONAL LIBRARIES =====
@@ -166,7 +202,7 @@ PKG_CHECK_MODULES([CHECK], [check >= 0.9.4], [have_check=yes], [have_check=no])
 
 # If check was fuond enable the tests that need to be built
 AS_IF([test "x$have_check" = "xyes"], [ 
-  CHECK_PROGRAMS="check_dpe check_secsolve check_unisolve check_multithread check_cluster"
+  CHECK_PROGRAMS="check_dpe check_secsolve check_unisolve check_multithread check_cluster check_chebyshev"
 ])
   
 AC_SUBST(CHECK_PROGRAMS)
@@ -212,19 +248,25 @@ AS_IF([test x$build_examples == xyes], [
 	# Detect Octave version. We are not able to build the Octave module
 	# if Octave is older than 3.0
 	AC_CHECK_PROGS([OCTAVE], [octave])
-	AC_MSG_CHECKING([if Octave is newer than 3.0])
-	OCTAVE_VERSION=`echo "disp(OCTAVE_VERSION)" | $OCTAVE -qf`	
-	AX_COMPARE_VERSION([$OCTAVE_VERSION], [ge], [3.0.0], [
-			AC_MSG_RESULT([yes])
-			
-			# If we have Octave that is sufficiently recent, we can enable the Octave module
-        	AS_IF([test "$MKOCTFILE" != ""], [enable_octave=yes OCTAVE_MODULES_PROGRAMS=mps_roots.oct])			
-		], [
-			AC_MSG_RESULT([no])
-		])
+
+	# Perform the version check only if Octave is found
+	AS_IF([test "$OCTAVE" != ""], [
+		AC_MSG_CHECKING([if Octave is newer than 3.0])
+		OCTAVE_VERSION=`echo "disp(OCTAVE_VERSION)" | $OCTAVE -qf`	
+		AX_COMPARE_VERSION([$OCTAVE_VERSION], [ge], [3.0.0], [
+				AC_MSG_RESULT([yes])
+				
+				# If we have Octave that is sufficiently recent, we can enable the Octave module
+	        	AS_IF([test "$MKOCTFILE" != ""], [enable_octave=yes OCTAVE_MODULES_PROGRAMS=mps_roots.oct])			
+			], [
+				AC_MSG_RESULT([no])
+			])
+	], [])
 
 	AC_SUBST(OCTAVE_MODULES_PROGRAMS)
 ])
+
+AM_CONDITIONAL([BUILD_OCT_FILE], [test "$enable_octave" == "yes"])
 
 # Check for the presence of "mex", the Matlab compiler
 # and if it's present, define MATLAB_MODULES_PROGRAMS
@@ -235,15 +277,17 @@ AS_IF([test x$build_examples == xyes], [
 
 	# We need to test if MEX is the matlab compiler
 	# or the polish version of the pdftex.
-	AC_MSG_CHECKING(if mex is the matlab compiler)
-	mex_is_matlab_output=`mex -help 2>&1 | grep MATLAB`
-	mex_is_matlab_retcode=$?
-	if [[ "$mex_is_matlab_retcode" != "0" ]]; then
-	  MEX=""
-	  AC_MSG_RESULT(no)
-	else
-	  AC_MSG_RESULT(yes)
-	fi
+	AS_IF([test "$MEX" != ""], [
+		AC_MSG_CHECKING(if mex is the matlab compiler)
+		mex_is_matlab_output=`mex -help 2>&1 | grep MATLAB`
+		mex_is_matlab_retcode=$?
+		if [[ "$mex_is_matlab_retcode" != "0" ]]; then
+		  MEX=""
+		  AC_MSG_RESULT(no)
+		else
+		  AC_MSG_RESULT(yes)
+		fi
+	], [])
 
 	# If we have find a valid Matlab compiler then add
 	# MATLAB to the target of compilation
@@ -252,6 +296,49 @@ AS_IF([test x$build_examples == xyes], [
 	  MATLAB_MODULES_PROGRAMS=mps_roots])
 	AC_SUBST(MATLAB_MODULES_PROGRAMS)
 ])
+
+# == CYTHON MODULE for PYTHON ==
+# Check if we can found the cython executable in the path. If found, 
+# assume that we can build cython
+PYTHON_MODULES=mpsolve.la
+AM_PATH_PYTHON([2.3],,[:])
+AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
+AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
+AS_IF([test -z "$PYTHON_INCLUDE"], [
+  AS_IF([test -z "$PYTHON_CONFIG"], [
+    AC_PATH_PROGS([PYTHON_CONFIG],
+                  [python$PYTHON_VERSION-config python-config],
+                  [no],
+                  [`dirname $PYTHON`])
+    AS_IF([test "$PYTHON_CONFIG" = no], [
+        AC_MSG_WARN([cannot find python-config for $PYTHON.])
+        PYTHON_MODULES=
+    ])
+  ])
+  AC_MSG_CHECKING([python include flags])
+  PYTHON_INCLUDE=`$PYTHON_CONFIG --includes`
+  AC_MSG_RESULT([$PYTHON_INCLUDE])
+])
+
+AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON_MODULES" == "mpsolve.la"])
+
+# Trick to get the extension of the python module right. 
+host_os=`echo "$host" | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+py_libext=so
+case "$host_os" in
+  cygwin* | mingw* | pw32* | cegcc*)
+    py_libext=dll
+    ;;
+esac
+
+AC_CHECK_PROGS([CYTHON], [cython])
+AS_IF([test x"$CYTHON" == x""], [
+  PYTHON_MODULES=
+], [
+])
+AC_SUBST(PYTHON_MODULES)
+
+AM_CONDITIONAL([HAVE_CYTHON], [test "$CYTHON" != ""])
 
 # Check for GTK libraries to enable the example that is given
 # in examples/gtk
@@ -273,34 +360,65 @@ AS_IF([test x$build_examples == xyes && test x$have_gtk == x1 && test x$have_cai
 # Search qmake and Qt related things, so we can build
 # MPSolve UI. Don't build the UI if the user has manually
 # disabled it. 
-QT4_PROGRAMS=
-AS_IF([test x$build_ui == xyes], [
-	AC_CHECK_PROGS([QMAKE_QT4], [qmake-qt4 qmake])
-	if test "x$QMAKE_QT4" != "x"; then
-		# Check that this is really the qmake-qt4 command and
-		# not the Qt3 one. 
-		AC_MSG_CHECKING([if qmake is at least for Qt 4.0.0])
-		QMAKE_VERSION=`$QMAKE_QT4 -version | grep "Qt version" | cut -d ' ' -f4`
-		AC_SUBST([QMAKE_VERSION])
-		AX_COMPARE_VERSION([$QMAKE_VERSION], [ge], [4.0.0], [
-			AC_MSG_RESULT([yes])
-			QT4_PROGRAMS=xmpsolve
-		], [
-			AC_MSG_RESULT([no])
+QT_PROGRAMS=
+AS_IF([test "$build_ui" == "yes"], [
+        PKG_CHECK_MODULES(QT4, [ QtCore QtGui ],   [have_qt4=yes], [have_qt4=no])
+	PKG_CHECK_MODULES(QT5, [ Qt5Core Qt5Gui Qt5Widgets ], [have_qt5=yes], [have_qt5=no])
+
+	AS_IF([test "$have_qt5" == "no" && test "$have_qt4" == "no"], [
+		# No hope to have the UI, just disable it. 
+		AC_MSG_NOTICE([Could not find Qt4 or Qt5, disabling the graphical UI])
+		QT_PROGRAMS=""
+	], [
+		QT_PROGRAMS=xmpsolve${EXEEXT}
+	])
+
+	AS_IF([test "$have_qt5" == "yes"], [
+		# Check for needed programs
+		AC_CHECK_PROGS([UIC], [uic])
+		AC_CHECK_PROGS([MOC], [moc])	
+
+		QT_CFLAGS=$QT5_CFLAGS
+		QT_LDFLAGS=$QT5_LDFLAGS
+		QT_LIBS=$QT5_LIBS
+
+		AS_IF([test "$UIC" == "" || test "$MOC" == ""], [
+			AC_MSG_WARN([uic or moc were not found in your path, so Qt5 is not usable])
+			have_qt5=no
 		])
-	fi
+        ], [])
+	
+	# Enable Qt4 only if Qt5 was not found, or if the required tools
+	# to build the interface are not available. 
+	AS_IF([test "$have_qt4" == "yes" && test "$have_qt5" == "no"], [
+                AC_CHECK_PROGS([UIC], [uic-qt4])
+                AC_CHECK_PROGS([MOC], [moc-qt4])		
 
-	AC_CHECK_PROGS([UIC_QT4], [uic-qt4])
-	if test "x$UIC_QT4" == "x"; then
-		QT4_PROGRAMS=""
-	fi
+		QT_CFLAGS=$QT4_CFLAGS
+		QT_LDFLAGS=$QT4_LDFLAGS
+		QT_LIBS=$QT4_LIBS
 
-	if test "x$QT4_PROGRAMS" == "x"; then
-		build_ui=no
+		AS_IF([test "$UIC" == "" || test "$MOC" == ""], [
+			AC_MSG_WARN([uic and/or moc were not found in your path, so Qt4 is not usable])
+			QT_PROGRAMS=""
+		])
+        ]) # End of have_qt4 == yes && have_qt5 == no
+
+	AS_IF([test x"$have_qt4" == x"no" && test x"$have_qt5" == x"no"], [
+        	QT_PROGRAMS=""
+	])
+
+	AS_IF([test "$QT_PROGRAMS" == ""], [
 		have_ui=no
-	fi
+		build_ui=no
+	])
 ])
-AC_SUBST(QT4_PROGRAMS)
+
+AM_CONDITIONAL([HAVE_UI], [test x"$QT_PROGRAMS" != x""])
+AC_SUBST(QT_PROGRAMS)
+AC_SUBST(QT_CFLAGS)
+AC_SUBST(QT_LDFLAGS)
+AC_SUBST(QT_LIBS)
 
 #
 # ===== MPSOLVE DOCUMENTATION ======
@@ -330,13 +448,15 @@ AC_CONFIG_FILES([Makefile
     examples/octave/Makefile
     examples/matlab/Makefile
     examples/gtk/Makefile
+    examples/python/Makefile
     src/Makefile
     src/mpsolve/Makefile
+    src/mpsolve/mpsolve.1
     src/libmps/Makefile
     src/tests/Makefile
     src/xmpsolve/Makefile
-    src/xmpsolve/xmpsolve.pro
     src/xmpsolve/xmpsolve.desktop
+    src/xmpsolve/xmpsolve.1
     doc/Makefile
     doc/Doxyfile])
 
@@ -371,6 +491,12 @@ if [test x$build_ui = xyes]; then
 	echo "	Graphical UI:		$build_ui"
 else
 	echo "	Graphical UI:		no"
+fi
+
+if [test x"$PYTHON_MODULES" = x""]; then
+        echo "	Python module:          no"
+else
+        echo "	Python module:          yes"
 fi
 
 echo "

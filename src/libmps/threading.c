@@ -16,6 +16,18 @@
 #include <pthread.h>
 #include <stdio.h>
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef __WINDOWS
+#include <windows.h>
+#endif
+
 /**
  * @brief Get number of logic cores on the local machine, or
  * 0 if that information is not available with the method
@@ -24,44 +36,47 @@
 int
 mps_thread_get_core_number (mps_context * s)
 {
-  FILE *cpuinfo = fopen ("/proc/cpuinfo", "r");
-  char buf;
   int cores = 0;
   char * cores_env = NULL;
 
+#ifdef __WINDOWS
+  SYSTEM_INFO windows_sys_info;
+#endif
+
   if ((cores_env = getenv ("MPS_JOBS")) != NULL)
     {
-      cores = atoi (cores_env);
-      return cores;
+      /* Give reasonable bounds to the possible values of MPS_JOBS */
+      cores = MAX (1, MIN (MPS_MAX_CORES, atoi (cores_env)));
 
-      if (cpuinfo) 
-        fclose (cpuinfo);
-    }
-
-  /* If the metafile /proc/cpuinfo is not available
-   * return 0                                    */
-  if (!cpuinfo)
-    {
-      if (s->debug_level & MPS_DEBUG_MEMORY)
-        MPS_DEBUG (s, "Found %d cores on this system", cores);
       return cores;
     }
 
-  /* Check for newlines in /proc/cpuinfo, that should correspond
-   * to logical cores.                                        */
-  while (!feof (cpuinfo) && ((buf = fgetc (cpuinfo)) != EOF))
+  /* Test for POSIX platforms */
+#ifdef HAVE_SYSCONF
+  cores = sysconf (_SC_NPROCESSORS_ONLN);
+#endif
+
+#ifdef __WINDOWS
+  GetSystemInfo (&windows_sys_info);
+  cores = windows_sys_info.dwNumberOfProcessors;
+#endif
+
+  if (cores != 0)
+    MPS_DEBUG_WITH_INFO (s, "Found %d cores on this system", cores);
+
+  /* In case no runtime method of finding the available cores
+   * worked out, select a fixed value. */
+  if (cores <= 0)
+  {
+    cores = 8;
+    if (s->debug_level & MPS_DEBUG_INFO)
     {
-      if (feof(cpuinfo))
-        break;
-      if (buf == '\n')
-        if (fgetc (cpuinfo) == '\n')
-          cores++;
+      MPS_DEBUG(s, "No runtime information about available cores found");
+      MPS_DEBUG(s, "Selecting a fixed number of %d threads", cores);
+      MPS_DEBUG(s, "Use the MPS_JOBS environment variable to override this value");
     }
+  }
 
-  fclose (cpuinfo);
-
-  if (s->debug_level & MPS_DEBUG_MEMORY)
-    MPS_DEBUG (s, "Found %d cores on this system", cores);
   return cores;
 }
 
@@ -248,9 +263,11 @@ void mps_thread_pool_set_concurrency_limit (mps_context * s, mps_thread_pool * p
     pool->n = concurrency_limit;
 
     i = 0;
-    for (thread = old_first; i < (pool->concurrency_limit - concurrency_limit); thread = thread->next, i++)
+    for (thread = old_first; i < (pool->concurrency_limit - concurrency_limit); i++)
     {
+      mps_thread * next = thread->next;
       mps_thread_free (s, thread);
+      thread = next;
     }
   }
   else
