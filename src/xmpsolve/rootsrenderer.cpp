@@ -1,4 +1,5 @@
 #include "rootsrenderer.h"
+#include "rootsmodel.h"
 #include <QPainter>
 #include <QDebug>
 #include <cmath>
@@ -138,12 +139,34 @@ RootsRenderer::paintEvent(QPaintEvent *)
 
     drawTicks(painter);
 
+    // The default color for the point is red.
     painter.setBrush(QBrush("red"));
     painter.setPen(QColor(Qt::red));
-    foreach(QPointF point, m_roots)
+
+    // ...and we need this to keep track of the MARKED point,
+    // if it exists.
+    int markedPoint = -1;
+
+    for (int i = 0; i < m_roots.length(); i++)
     {
-        QPointF p = scalePoint(point, w, h);
-        painter.drawEllipse(p, 2, 2);
+        QPointF p = scalePoint(m_roots[i], w, h);
+
+        // We draw only not MARKED points. The MARKED one will be drawn in
+        // green outside of this for loop.
+        if (! m_model->data(m_model->index(i), RootsModel::MARKED).toBool())
+            painter.drawEllipse(p, 2, 2);
+        else
+            markedPoint = i;
+    }
+
+    // If we have left out the MARKED point (and this happend only if this
+    // point exists) then draw it with green, and bigger than the others.
+    if (markedPoint != -1)
+    {
+        QPointF p = scalePoint(m_roots[markedPoint], w, h);
+        painter.setBrush(QBrush("green"));
+        painter.setBrush(QColor(Qt::green));
+        painter.drawEllipse(p, 5, 5);
     }
 }
 
