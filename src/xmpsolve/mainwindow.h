@@ -24,6 +24,12 @@ public:
 
 public slots:
     void polynomial_solved();
+
+    /**
+     * @brief openPolFile loads a .pol file given its path
+     * @param path The path to the .pol file
+     */
+    void openPolFile(QString path);
     
 private slots:
     void on_solveButton_clicked();
@@ -37,6 +43,12 @@ private slots:
     void on_editPolFileButton_clicked();
 
     void on_polFileSolveButton_clicked();
+
+    void on_actionOpen_pol_file_triggered();
+
+    void on_actionQuit_triggered();
+
+    void on_actionAbout_MPSolve_triggered();
 
 private:
     Ui::MainWindow *ui;

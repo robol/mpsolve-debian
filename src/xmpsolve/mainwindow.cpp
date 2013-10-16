@@ -89,22 +89,27 @@ void xmpsolve::MainWindow::on_openPolFileButton_clicked()
                                                         tr("Select .pol file"),
                                                         QString(),
                                                         "Pol files (*.pol);;Text files (*.txt)");
-    if (! selectedFile.isEmpty())
-    {
-        QFile polFile(selectedFile);
+    openPolFile(selectedFile);
+}
 
-        // Clean previous polynomials, if any
-        ui->polyLineEdit->clear();
+void xmpsolve::MainWindow::openPolFile(QString path)
+{
+    QFile polFile(path);
 
-        // Select the polynomial
-        if (polFile.exists()) {
-            m_selectedPolFile = selectedFile;
-            ui->selectedFileLabel->setText(selectedFile.split("/").last());
+    // Clean previous polynomials, if any
+    ui->polyLineEdit->clear();
 
-            ui->selectedFileLabel->setEnabled(true);
-            ui->editPolFileButton->setEnabled(true);
-        }
+    // Select the polynomial
+    if (polFile.exists()) {
+        m_selectedPolFile = path;
+        ui->selectedFileLabel->setText(path.split("/").last());
+
+        ui->selectedFileLabel->setEnabled(true);
+        ui->editPolFileButton->setEnabled(true);
     }
+
+    // Switch the view to the correct tab
+    ui->tabWidget->setCurrentIndex(1);
 }
 
 void xmpsolve::MainWindow::on_listRootsView_clicked(const QModelIndex &index)
@@ -159,4 +164,29 @@ void xmpsolve::MainWindow::on_polFileSolveButton_clicked()
         mbox.exec();
         unlockInterface();
     }
+}
+
+void xmpsolve::MainWindow::on_actionOpen_pol_file_triggered()
+{
+    on_openPolFileButton_clicked();
+}
+
+
+
+void xmpsolve::MainWindow::on_actionQuit_triggered()
+{
+    QApplication::exit();
+}
+
+void xmpsolve::MainWindow::on_actionAbout_MPSolve_triggered()
+{
+    QMessageBox::about(this, tr("About ") + PACKAGE_STRING,
+                       QString("<h1>%1</h1>").arg(PACKAGE_STRING) +
+                       "MPSolve is free software released under the GNU Public License 3.<br>" +
+                       "Further documentation and a bug tracker are available at our " +
+                       "<a href=\"http://mpsolve.dm.unipi.it/mpsolve/\">website</a>. " +
+                       "<h3>Authors:</h3>" +
+                       " - Dario A. Bini &lt;<a href=\"mailto:bini@dm.unipi.it\">bini@dm.unipi.it</a>&gt;<br>" +
+                       " - Giuseppe Fiorentino &lt;<a href=\"mailto:fiorent@dm.unipi.it\">fiorent@dm.unipi.it</a>&gt;<br>" +
+                       " - Leonardo Robol &lt;<a href=\"mailto:leonardo.robol@sns.it\">leonardo.robol@sns.it</a>&gt; <br>");
 }
