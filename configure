@@ -684,6 +684,8 @@ CAIRO_CFLAGS
 GTK_LIBS
 GTK_CFLAGS
 CHECK_PROGRAMS
+CHECK_FALSE
+CHECK_TRUE
 CHECK_LIBS
 CHECK_CFLAGS
 PKG_CONFIG_LIBDIR
@@ -17613,6 +17615,14 @@ else
 $as_echo "yes" >&6; }
 	have_check=yes
 fi
+ if test x$have_check = xyes; then
+  CHECK_TRUE=
+  CHECK_FALSE='#'
+else
+  CHECK_TRUE='#'
+  CHECK_FALSE=
+fi
+
 
 # If check was fuond enable the tests that need to be built
 if test "x$have_check" = "xyes"; then :
@@ -19318,6 +19328,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_WINDRES_TRUE}" && test -z "${HAVE_WINDRES_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_WINDRES\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CHECK_TRUE}" && test -z "${CHECK_FALSE}"; then
+  as_fn_error $? "conditional \"CHECK\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_OCT_FILE_TRUE}" && test -z "${BUILD_OCT_FILE_FALSE}"; then
