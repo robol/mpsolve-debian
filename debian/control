@@ -12,7 +12,8 @@ Build-Depends: debhelper (>= 7.0.0), autotools-dev,
         cython,
         python-dev,
 	python-support,
-	debhelper (>= 9)
+	debhelper (>= 9),
+	dh-exec
 Standards-Version: 3.9.4
 Homepage: http://mpsolve.dm.unipi.it/mpsolve/
 Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git

@@ -1,3 +1,5 @@
-/usr/lib/libmps.so.*
+#!/usr/bin/dh-exec
+
+usr/lib/$(DEB_HOST_MULTIARCH)/libmps.so.*
 /usr/share/mime/packages/*
 /usr/share/mime-info/*
