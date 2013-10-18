@@ -57,7 +57,7 @@ Description: Multiprecision polynomial solver
 Package: python-mpsolve
 Architecture: any
 Section: python
-Depends: ${misc:Depends}, libmps3 (= ${binary:Version}), ${shlibs:Depends}, ${python:Depends}
+Depends: ${misc:Depends}, libmps3 (= ${binary:Version}), ${shlibs:Depends}
 Description: Multiprecision polynomial solver
  A polynomial rootfinder that can determine arbitrary precision approximations
  with guaranteed inclusion radii.
