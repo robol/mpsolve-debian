@@ -11,7 +11,8 @@ Build-Depends: debhelper (>= 7.0.0), autotools-dev,
 	libtcmalloc-minimal4 | libtcmalloc-minimal0,
         cython,
         python-dev,
-	python-support
+	python-support,
+	debhelper (>= 9)
 Standards-Version: 3.9.4
 Homepage: http://mpsolve.dm.unipi.it/mpsolve/
 Vcs-Git: git://bezout.dm.unipi.it/mpsolve.git
