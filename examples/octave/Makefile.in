@@ -644,7 +644,7 @@ uninstall-am: uninstall-local
 
 
 @BUILD_OCT_FILE_TRUE@mps_roots.o:
-@BUILD_OCT_FILE_TRUE@	@$(MKOCTFILE) $(GMP_CFLAGS) -I${top_srcdir}/include -c -o mps_roots.o ${srcdir}/mps_roots.cc
+@BUILD_OCT_FILE_TRUE@	$(MKOCTFILE) $(GMP_CFLAGS) -I${top_srcdir}/include -c -o mps_roots.o ${srcdir}/mps_roots.cc
 
 @BUILD_OCT_FILE_TRUE@clean-local:
 @BUILD_OCT_FILE_TRUE@	rm -r ${builddir}/package
@@ -658,8 +658,10 @@ uninstall-am: uninstall-local
 @BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix} ; pkg uninstall mpsolve"
 
 @BUILD_OCT_FILE_TRUE@mpsolve.tar.gz: mps_roots.oct
-@BUILD_OCT_FILE_TRUE@	cp -r ${srcdir}/package/ ${builddir}
-@BUILD_OCT_FILE_TRUE@	chmod u+w package -R
+@BUILD_OCT_FILE_TRUE@	test -d package || (cp -r ${srcdir}/package/ ${builddir} && chmod u+w package -R)
+@BUILD_OCT_FILE_TRUE@	test -f package/COPYING || cp ${srcdir}/package/COPYING package/
+@BUILD_OCT_FILE_TRUE@	test -f package/DESCRIPTION || cp ${srcdir}/package/DESCRIPTION package/
+@BUILD_OCT_FILE_TRUE@	test -d package/src || mkdir package/src
 @BUILD_OCT_FILE_TRUE@	cp ${builddir}/mps_roots.oct ${builddir}/package/src/
 @BUILD_OCT_FILE_TRUE@	tar czf ${builddir}/mpsolve.tar.gz ${builddir}/package
 
