@@ -10,8 +10,8 @@ Build-Depends: debhelper (>= 7.0.0), autotools-dev,
 	libqt4-dev,
 	libtcmalloc-minimal4 | libtcmalloc-minimal0,
         cython,
-        python-dev,
-	python-support,
+        python-all-dev (>= 2.6.6-3),
+	dh-python,
 	debhelper (>= 9),
 	dh-exec
 Standards-Version: 3.9.4
