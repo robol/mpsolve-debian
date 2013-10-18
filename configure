@@ -18059,7 +18059,7 @@ done
 
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if Octave is newer than 3.0" >&5
 $as_echo_n "checking if Octave is newer than 3.0... " >&6; }
-		OCTAVE_VERSION=`echo "disp(OCTAVE_VERSION)" | $OCTAVE -qf`
+		OCTAVE_VERSION=`octave -q -H --eval "disp(OCTAVE_VERSION)"`
 
 
 
