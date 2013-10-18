@@ -31,6 +31,8 @@ Description: Multiprecision polynomial solver
 
 Package: libmps3
 Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Multiprecision polynomial solver
  A polynomial rootfinder that can determine arbitrary precision approximations
