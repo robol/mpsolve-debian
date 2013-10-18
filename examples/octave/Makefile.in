@@ -652,10 +652,15 @@ uninstall-am: uninstall-local
 @BUILD_OCT_FILE_TRUE@install-exec-hook:
 @BUILD_OCT_FILE_TRUE@	mkdir -p ${octave_share_prefix}
 @BUILD_OCT_FILE_TRUE@	mkdir -p ${octave_lib_prefix}
-@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix} ; pkg install -verbose ${builddir}/mpsolve.tar.gz"
+@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix}; \
+@BUILD_OCT_FILE_TRUE@	pkg global_list ${DESTDIR}/${datadir}/octave/octave_packages; \
+@BUILD_OCT_FILE_TRUE@	pkg install -verbose -nodeps \
+@BUILD_OCT_FILE_TRUE@	${builddir}/mpsolve.tar.gz"
 
 @BUILD_OCT_FILE_TRUE@uninstall-local:
-@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix} ; pkg uninstall -verbose mpsolve"
+@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix}; \
+@BUILD_OCT_FILE_TRUE@	pkg global_list ${DESTDIR}/${datadir}/octave/octave_packages; \
+@BUILD_OCT_FILE_TRUE@	pkg uninstall -verbose mpsolve"
 
 @BUILD_OCT_FILE_TRUE@mpsolve.tar.gz: mps_roots.oct
 @BUILD_OCT_FILE_TRUE@	test -d package || (cp -r ${srcdir}/package/ ${builddir} && chmod u+w package -R)
