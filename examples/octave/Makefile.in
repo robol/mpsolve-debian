@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -145,6 +146,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+DATA = $(noinst_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -337,8 +339,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_OCT_FILE_TRUE@noinst_PROGRAMS = $(OCTAVE_MODULES_PROGRAMS)
+@BUILD_OCT_FILE_TRUE@noinst_DATA = mpsolve.tar.gz
+@BUILD_OCT_FILE_TRUE@EXTRA_DIST = \
+@BUILD_OCT_FILE_TRUE@	package \
+@BUILD_OCT_FILE_TRUE@	package/DESCRIPTION \
+@BUILD_OCT_FILE_TRUE@	package/COPYING \
+@BUILD_OCT_FILE_TRUE@	package/src
+
+@BUILD_OCT_FILE_TRUE@CLEANFILES = mpsolve.tar.gz
+@BUILD_OCT_FILE_TRUE@octave_share_prefix = ${DESTDIR}${datadir}/octave/packages
+@BUILD_OCT_FILE_TRUE@octave_lib_prefix = ${DESTDIR}${libdir}/octave/packages
 @BUILD_OCT_FILE_TRUE@mps_roots_oct_SOURCES = mps_roots.cc
-@BUILD_OCT_FILE_TRUE@mps_roots_oct_LINK = $(MKOCTFILE) -o $@ -L${top_builddir}/src/libmps/.libs
+@BUILD_OCT_FILE_TRUE@mps_roots_oct_LINK = $(MKOCTFILE) -o $@ -L${top_builddir}/src/libmps/.libs -lmps 
 all: all-am
 
 .SUFFIXES:
@@ -506,7 +518,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -530,6 +542,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -538,9 +551,12 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@BUILD_OCT_FILE_FALSE@uninstall-local:
+@BUILD_OCT_FILE_FALSE@clean-local:
+@BUILD_OCT_FILE_FALSE@install-exec-hook:
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+clean-am: clean-generic clean-libtool clean-local clean-noinstPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -568,7 +584,8 @@ install-dvi: install-dvi-am
 install-dvi-am:
 
 install-exec-am:
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -607,27 +624,44 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-local
 
-.MAKE: install-am install-strip
+.MAKE: install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
+	clean-libtool clean-local clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-exec-am install-exec-hook install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am
+	tags tags-am uninstall uninstall-am uninstall-local
 
 
 @BUILD_OCT_FILE_TRUE@mps_roots.o:
 @BUILD_OCT_FILE_TRUE@	@$(MKOCTFILE) $(GMP_CFLAGS) -I${top_srcdir}/include -c -o mps_roots.o ${srcdir}/mps_roots.cc
+
+@BUILD_OCT_FILE_TRUE@clean-local:
+@BUILD_OCT_FILE_TRUE@	rm -r ${builddir}/package
+
+@BUILD_OCT_FILE_TRUE@install-exec-hook:
+@BUILD_OCT_FILE_TRUE@	mkdir -p ${octave_share_prefix}
+@BUILD_OCT_FILE_TRUE@	mkdir -p ${octave_lib_prefix}
+@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix} ; pkg install ${builddir}/mpsolve.tar.gz"
+
+@BUILD_OCT_FILE_TRUE@uninstall-local:
+@BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix} ; pkg uninstall mpsolve"
+
+@BUILD_OCT_FILE_TRUE@mpsolve.tar.gz: mps_roots.oct
+@BUILD_OCT_FILE_TRUE@	cp -r ${srcdir}/package/ ${builddir}
+@BUILD_OCT_FILE_TRUE@	chmod u+w package -R
+@BUILD_OCT_FILE_TRUE@	cp ${builddir}/mps_roots.oct ${builddir}/package/src/
+@BUILD_OCT_FILE_TRUE@	tar czf ${builddir}/mpsolve.tar.gz ${builddir}/package
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
