@@ -1,1 +1,4 @@
-/usr/lib/octave/packages/mpsolve-3.1.4/x86_64-pc-linux-gnu-api-v48+/*
+#!/usr/bin/dh-exec
+
+/usr/lib/${DEB_HOST_MULTIARCH}/octave/*
+/usr/share/octave/*
