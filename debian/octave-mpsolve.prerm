@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Remove the Octave package
+
+octave -qH --eval "pkg uninstall mpsolve"
+
+#DEBHELPER#

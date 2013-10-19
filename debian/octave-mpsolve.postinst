@@ -4,3 +4,4 @@
 
 octave -qH --eval "pkg install -global -nodeps /usr/share/octave-mpsolve/mpsolve.tgz"
 
+#DEBHELPER#
