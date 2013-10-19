@@ -2,6 +2,8 @@
 #
 # Remove the Octave package
 
+set -e
+
 octave -qH --eval "pkg uninstall mpsolve"
 
 #DEBHELPER#

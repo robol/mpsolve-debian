@@ -2,6 +2,8 @@
 #
 # Install the Octave package for MPSolve
 
-octave -qH --eval "pkg install -global -nodeps /usr/share/octave-mpsolve/mpsolve.tgz"
+set -e
+
+octave -qH --eval "pkg install -global -nodeps /usr/share/octave-mpsolve/mpsolve.tar.gz"
 
 #DEBHELPER#
