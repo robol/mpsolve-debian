@@ -491,7 +491,8 @@ top_srcdir = @top_srcdir@
 @HAVE_UI_TRUE@	$(headers) \
 @HAVE_UI_TRUE@	$(desktop_DATA) \
 @HAVE_UI_TRUE@	$(ui_sfiles) \
-@HAVE_UI_TRUE@	xmpsolve.1
+@HAVE_UI_TRUE@	xmpsolve.1 \
+@HAVE_UI_TRUE@	xmpsolve.ico
 
 @HAVE_UI_TRUE@BUILT_SOURCES = $(moc_files) \
 @HAVE_UI_TRUE@	$(ui_files) \

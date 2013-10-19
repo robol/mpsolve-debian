@@ -661,6 +661,8 @@ uninstall-am: uninstall-local
 @BUILD_OCT_FILE_TRUE@	octave -q -H --eval "pkg prefix ${octave_share_prefix} ${octave_lib_prefix}; \
 @BUILD_OCT_FILE_TRUE@	pkg global_list ${DESTDIR}/${datadir}/octave/octave_packages; \
 @BUILD_OCT_FILE_TRUE@	pkg uninstall -verbose mpsolve"
+@BUILD_OCT_FILE_TRUE@	( rmdir ${DESTDIR}/${datadir}/octave/packages && rm -rf ${DESTDIR}/${datadir}/octave ) || \
+@BUILD_OCT_FILE_TRUE@	echo "Octave package dir is not empty, not removing it"
 
 @BUILD_OCT_FILE_TRUE@mpsolve.tar.gz: mps_roots.oct
 @BUILD_OCT_FILE_TRUE@	test -d package || (cp -r ${srcdir}/package/ ${builddir} && chmod u+w package -R)
